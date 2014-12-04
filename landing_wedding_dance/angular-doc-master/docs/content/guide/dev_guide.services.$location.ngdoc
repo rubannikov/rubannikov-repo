@@ -1,0 +1,630 @@
+@ngdoc overview
+@name Developer Guide: Angular Services: Применение $location
+@description
+
+# Как это работает?
+
+Сервис `$location` разбирает URL в адресной строке браузера (по ссылке {@link
+https://developer.mozilla.org/en/window.location window.location}) и делает URL доступным для приложения. 
+Изменения в URL в адресной строке отражаются в сервисе $location и изменения в $location отражаются в адресной строке браузера.
+
+**Сервис $location:**
+
+- Предоставляет доступ к текущему URL в адресной строке браузера, так что вы можете
+  - Следить и наблюдать за URL.
+  - Изменять URL.
+- Синхронизирует URL с браузером, когда пользователь
+  - Изменяет адресную строку.
+  - Щелкает по кнопкам вперед/назад (или перемещается по истории браузера).
+  - Щелкает по ссылкам.
+- Представляет объект URL в виде набора методов (протокол, хост, порт, путь, поиск, хэш).
+
+
+## Сравнение $location с window.location
+
+<table class="table">
+<thead>
+
+  <tr>
+    <th class="empty-corner-lt"></th>
+    <th>window.location</th>
+    <th>сервис $location</th>
+  </tr>
+
+</thead>
+<tbody>
+
+  <tr>
+    <td class="head">задача</td>
+    <td>разрешение на чтение/запись текущего адреса в браузере</td>
+    <td>та же</td>
+  </tr>
+
+  <tr>
+    <td class="head">API</td>
+    <td>предоставляет «сырой» Объект со свойствами, которые могут быть непосредственно изменены</td>
+    <td>представляет геттеры и сеттеры в jQuery-стиле</td>
+  </tr>
+
+  <tr>
+    <td class="head">интеграция с жизненным циклом angular-приложения</td>
+    <td>нет</td>
+    <td>знает обо всех внутренних фазах жизненного цикла, интегрируется с $watch, ...</td>
+  </tr>
+
+  <tr>
+    <td class="head">бесшовная интерграция HTML5 API</td>
+    <td>нет</td>
+    <td>да (с костылями для старых браузеров)</td>
+  </tr>
+
+  <tr>
+    <td class="head"> осведомленность о корневой директории/контексте, из которого загружено приложение</td>
+    <td>нет - window.location.path возвращает «/docroot/actual/path»</td>
+    <td>да - $location.path() возвращает «/actual/path»</td>
+  </tr>
+
+</tbody>
+</table>
+
+## Когда следует использовать $location?
+Каждый раз, когда приложение должно реагировать на изменения в текущем URL или если необходимо изменить
+текущий URL в браузере.
+
+## Чего не происходит?
+Изменение URL в браузере не вызовет полной перезагрузки страницы. Для обновления страницы после
+изменения URL, используйте API более низкого уровня, `$window.location.href`.
+
+# Основной обзор API
+
+Сервис `$location` может вести себя по-разному, в зависимости от настроек, заданных при его создании. 
+Настройки по умолчанию подходят большинству приложений,
+другие настройки конфигурации могут включить новые особенности.
+
+Как только сервис `$location` создастся, вы можете взаимодействовать с ним через геттеры и сеттеры JQuery-стиля, которые позволяют получить или изменить текущий URL в браузере.
+
+## Настройка сервиса $location
+
+Чтобы настроить сервис `$location`, верните {@link api/ng.$locationProvider $locationProvider} и установите следующие параметры:
+
+
+- **html5Mode(mode)**: {boolean}<br />
+  `true` - см. режим HTML5<br />
+  `false` - см. режим Hashbang<br />
+  default: `false`
+
+- **hashPrefix(prefix)**: {string}<br />
+  prefix используется для Hashbang URL (используется в режиме Hashbang или в устаревших браузерах в режиме HTML5)<br />
+  default: `""`
+
+### Пример настройки
+<pre>
+$locationProvider.html5Mode(true).hashPrefix('!');
+</pre>
+
+## Метод геттеров и сеттеров
+
+Сервис `$location` предоставляет метод геттера только для чтения частей URL (absUrl, protocol, host,
+port) и методы геттера/сеттера для url, path, search, hash:
+<pre>
+// получение текущего пути
+$location.path();
+
+// изменение пути
+$location.path('/newValue')
+</pre>
+
+Все сеттеры возвращют тот же объект `$location` для применения в цепочке. Например, чтобы
+изменить несколько сегментов цепочкой сеттеров так:
+<pre>$location.path('/newValue').search({key: value});</pre>
+
+Существует специальный метод `replace`, который может быть использован для вызова сервиса $location, чтобы, когда сервис 
+$location синхронизируется с браузером, последняя запись в истории была бы заменена
+вместо создания новой. Это полезно, когда вы хотите реализовать перенаправление, которое
+в противном случае сломает кнопку возврата (переход назад вернул бы перенаправление). Изменить
+текущий URL без создания новой записи в истории браузера можно вызвав:
+<pre>
+  $location.path('/someNewPath');
+  $location.replace();
+  // или можно выстроить в цепочку: $location.path('/someNewPath').replace();
+</pre>
+
+Обратите внимание, что сеттеры не обновляют `window.location` немедленно. Вместо этого сервис `$location`
+осведомляется {@link api/ng.$rootScope.Scope областью видимости} о жизненном цикле и сливает несколько изменений 
+`$location` в один «коммит» для объекта `window.location` во время фазы `$digest`. С
+множественными изменениями состояния $location будет добавлено в браузер как одно изменение, это
+достаточно чтобы вызвать метод `replace()` только один раз, чтобы сделать в «коммите» операцию замены
+, а не дополнение истории браузера. Как только страница в браузере обновится, Сервис $location сбросит флаг, 
+установленный методом `replace()` и будущие изменения будут создавать новые записи в истории пока `replace()` не 
+будет вызван снова.
+
+### Сеттеры и кодировка
+Можно передать специальные символы в сервис `$location` и они закодируются в соответствии со спецификацией 
+{@link http://www.ietf.org/rfc/rfc3986.txt RFC 3986}. При обращении к методам:
+
+- Любые значения, передаваемые в `$location` сеттером, `path()`, `search()`, `hash()` кодируются.
+- Геттеры (вызванные без параметров) возвращают раскодированное значение для методов
+`path()`, `search()`, `hash()`.
+- При вызове метода `absUrl()`, возвращенное значение представляет собой полный url, все части которого закодированы.
+- При вызове метода `url()`, возвращенное значение представляет собой путь, парметры поиска или хэш в виде
+`/path?search=a&b=c#hash`. Части так же кодируются.
+
+
+# Hashbang и режим HTML5
+
+У cервиса `$location` есть два режима конфигурации, которые управляют форматом URL в адресной 
+строке браузера: **режим Hashbang** (по умолчанию) и **режим HTML5**, которые основаны на использовании
+HTML5 {@link http://www.w3.org/TR/html5/history.html История API}. Приложения используют тот же интерфейс в
+обоих режимов и сервис `$location` будет работать с соответствующими частями URL и браузерным API для
+способствования изменению URL браузера и управления историей.
+
+<img src="img/guide/hashbang_vs_regular_url.jpg">
+
+<table class="table">
+<thead>
+
+  <tr>
+    <th class="empty-corner-lt"></th>
+    <th>режим Hashbang</th>
+    <th>режим HTML5</th>
+  </tr>
+
+</thead>
+<tbody>
+
+  <tr>
+    <td class="head">конфигурация</td>
+    <td>по умолчанию</td>
+    <td>{ html5Mode: true }</td>
+  </tr>
+
+  <tr>
+    <td class="head">формат URL</td>
+    <td>hashbang URLs в любом браузере</td>
+    <td>постоянные URL в современном браузере, hashbang URL в старом браузере</td>
+  </tr>
+
+  <tr>
+    <td class="head">&lt;a href=""&gt; перезапись ссылок</td>
+    <td>нет</td>
+    <td>да</td>
+  </tr>
+
+  <tr>
+    <td class="head">запрос серверных настроек</td>
+    <td>нет</td>
+    <td>да</td>
+  </tr>
+</tbody>
+</table>
+
+## Режим hashbang (режим по умолчанию)
+
+В этом режиме `$location` использует Hashbang URL в любых браузерах.
+
+### Пример
+
+<pre>
+it('should show example', inject(
+  function($locationProvider) {
+    $locationProvider.html5Mode(false);
+    $locationProvider.hashPrefix = '!';
+  },
+  function($location) {
+    // открываем http://host.com/base/index.html#!/a
+    $location.absUrl() == 'http://host.com/base/index.html#!/a'
+    $location.path() == '/a'
+
+    $location.path('/foo')
+    $location.absUrl() == 'http://host.com/base/index.html#!/foo'
+
+    $location.search() == {}
+    $location.search({a: 'b', c: true});
+    $location.absUrl() == 'http://host.com/base/index.html#!/foo?a=b&c'
+
+    $location.path('/new').search('x=y');
+    $location.absUrl() == 'http://host.com/base/index.html#!/new?x=y'
+  }
+));
+</pre>
+
+### Индексация приложения
+
+Чтобы разрешить индексацию AJAX-приложения, необходимо добавить специальный мета-тег в заголовок документа:
+<pre><meta name="fragment" content="!" /></pre>
+
+Это приведет к тому что поисковый бот запросит ссылки упареметра `_escaped_fragment_`, чтобы ваш сервер
+мог распознать индексацию и выдал снимок HTML. Для получения дополнительной информации об этой технике см. {@link http://code.google.com/web/ajaxcrawling/docs/specification.html Making AJAX Applications
+Crawlable}
+
+## Режим HTML5
+
+В режиме HTML5 геттеры и сеттеры сервиса `$location` взаимодействуют с URL-адресом браузера
+через HTML5 history API, который позволяет использовать обычный путь URL и поиск частей 
+вместо их hashbang эквивалентов. Если HTML5 History API не поддерживается браузером, сервис `$location` 
+вернется к использованию hashbang URL-адресов автоматически. Это освобождает вас от
+беспокойства, поддерживает ли браузер history API или нет; сервис `$location` прозрачно воспользуется лучшим вариантом.
+
+- Открытие постоянного URL в устаревшем браузере -> перенаправляет на hashbang URL
+- Открытие hashbang URL в современном браузере -> перезаписывает на постоянный URL
+
+### Пример
+
+<pre>
+it('should show example', inject(
+  function($locationProvider) {
+    $locationProvider.html5Mode(true);
+    $locationProvider.hashPrefix = '!';
+  },
+  function($location) {
+    // в браузере с поддержкой HTML5 history:
+    // открываем http://host.com/#!/a -> перезаписываем на http://host.com/a
+    // (заменяем запись http://host.com/#!/a в истории)
+    $location.path() == '/a'
+
+    $location.path('/foo');
+    $location.absUrl() == 'http://host.com/foo'
+
+    $location.search() == {}
+    $location.search({a: 'b', c: true});
+    $location.absUrl() == 'http://host.com/foo?a=b&c'
+
+    $location.path('/new').search('x=y');
+    $location.url() == 'new?x=y'
+    $location.absUrl() == 'http://host.com/new?x=y'
+
+    // в браузере, не поддерживающем html5 history:
+    // открываем http://host.com/new?x=y -> перенаправляем на http://host.com/#!/new?x=y
+    // (вновь заменяем часть http://host.com/new?x=y в истории)
+    $location.path() == '/new'
+    $location.search() == {x: 'y'}
+
+    $location.path('/foo/bar');
+    $location.path() == '/foo/bar'
+    $location.url() == '/foo/bar?x=y'
+    $location.absUrl() == 'http://host.com/#!/foo/bar?x=y'
+  }
+));
+</pre>
+
+### Поддержка старых браузеров
+
+Для браузеров, которые поддерживают HTML5 history API, `$location` использует HTML5 history API для записи 
+пути и поиска. Если history API не поддерживается браузером, `$location` подставляет Hasbang
+URL. Это освобождает вас от
+беспокойства, поддерживает ли браузер history API или нет; сервис `$location` прозрачно воспользуется лучшим вариантом.
+
+### Перезапись ссылок в html
+
+При использовании режима HTML5 history API разным браузерам будут необходимы разные ссылки, но все, что 
+нужно сделать, это указать постоянные URL-ссылки, такие как: `<a href="/some?foo=bar">link</a>`
+
+Когда пользователь щелкает по ссылке,
+
+- В старом браузере URL меняется на `/index.html#!/some?foo=bar`
+- В современном браузере URL меняется на `/some?foo=bar`
+
+
+В случаях как в примере ниже, ссылки не переписываются; вместо этого, браузер покажет целую страницу, загруженную по 
+первоначальной ссылке.
+
+- Ссылки, которые содержат элемент `target`<br>
+  Пример: `<a href="/ext/link?a=b" target="_self">ссылка</a>`
+- Абсолютные ссылки на другой домен<br>
+  Пример: `<a href="http://angularjs.org/">ссылка</a>`
+- Ссылки, начинающиеся с '/', которые ведут различными основными путями, когда основа определена<br>
+  Пример: `<a href="/not-my-base/link">ссылка</a>`
+
+
+### Серверная сторона
+
+Использование этого режима требует переписывания URL на стороне сервера, в основном необходимо перезаписывать все ссылки
+на точку входа в приложение (например, index.html)
+
+### Индексация приложения
+
+Если необходимо, чтобы Ajax-приложение было проиндексировано поисковиками, нужно добавить следующий
+мета-тег в заголовок страницы:
+<pre><meta name="fragment" content="!" /></pre>
+
+Этот тег говорит ботам запросить ссылки с пустым параметром `_escaped_fragment_` чтобы
+сервер мог распознать ботов передал бы снимки HTML. Для получения дополнительной информации об этом
+методе см. {@link http://code.google.com/web/ajaxcrawling/docs/specification.html Making AJAX
+Applications Crawlable}.
+
+### Относительные ссылки
+
+Не забудьте проверить все относительные ссылки, изображения, скрипты и т.д. Необходимо указать базовый URL в
+в заголовочном разделе HTML-файла (`<base href="/my-base">`) или необходимо везде использовать абсолютные URL-адреса
+(начинающиеся с `/`), потому что относительные URL-адреса будут приведены к абсолютным, с использованием 
+начального абсолютного адреса документа, который часто отличается от корня приложения.
+
+рекомендуется запускать Angular-приложения с включеным History API из корня документа, поскольку это
+снимает все вопросы, связанные с относительными ссылками.
+
+### Перенаправление ссылок в различных браузерах
+
+Так как ссылки перезаписываются при включенном режиме HTML5, пользователи могут открывать оба вида ссылок 
+в различных браузерах:
+
+- Современные браузеры перезаписывают hashbang URL на постоянные URL.
+- Старые браузеры перенаправляют с постоянного URL на hashbang URL.
+
+### Пример
+
+Показаны два экземпляра `$location` в **режиме Html5**, но запущенных в разных браузерах, так, чтобы 
+были видны различия. Эти сервисы `$location` продемонстрированы в эмуляции браузеров, где каждый элемент input 
+представляет собой адресную строку браузера.
+
+Заметьте, что при использовании hashbang url в первом браузере (или наоборот) то перезапись/перенаправление 
+на постоянный/hashbang url не происходит, т.к. подобное преобразование случается только при разборе начального url 
+= перезагрузке страницы.
+
+В примере используется `<base href="/base/index.html" />`
+<doc:example>
+<doc:source source="false">
+
+<div ng-non-bindable class="html5-hashbang-example">
+  <div id="html5-mode" ng-controller="Html5Cntl">
+    <h3>Browser with History API</h3>
+    <div ng-address-bar browser="html5"></div><br><br>
+    $location.protocol() = {{$location.protocol()}}<br>
+    $location.host() = {{$location.host()}}<br>
+    $location.port() = {{$location.port()}}<br>
+    $location.path() = {{$location.path()}}<br>
+    $location.search() = {{$location.search()}}<br>
+    $location.hash() = {{$location.hash()}}<br>
+    <a href="http://www.host.com/base/first?a=b">/base/first?a=b</a> |
+    <a href="http://www.host.com/base/sec/ond?flag#hash">sec/ond?flag#hash</a> |
+    <a href="/other-base/another?search">external</a>
+  </div>
+
+  <div id="hashbang-mode" ng-controller="HashbangCntl">
+    <h3>Browser without History API</h3>
+    <div ng-address-bar browser="hashbang"></div><br><br>
+    $location.protocol() = {{$location.protocol()}}<br>
+    $location.host() = {{$location.host()}}<br>
+    $location.port() = {{$location.port()}}<br>
+    $location.path() = {{$location.path()}}<br>
+    $location.search() = {{$location.search()}}<br>
+    $location.hash() = {{$location.hash()}}<br>
+    <a href="http://www.host.com/base/first?a=b">/base/first?a=b</a> |
+    <a href="http://www.host.com/base/sec/ond?flag#hash">sec/ond?flag#hash</a> |
+    <a href="/other-base/another?search">external</a>
+  </div>
+</div>
+
+<script>
+  function FakeBrowser(initUrl, baseHref) {
+    this.onUrlChange = function(fn) {
+      this.urlChange = fn;
+    };
+
+    this.url = function() {
+      return initUrl;
+    };
+
+    this.defer = function(fn, delay) {
+      setTimeout(function() { fn(); }, delay || 0);
+    };
+
+    this.baseHref = function() {
+      return baseHref;
+    };
+
+    this.notifyWhenOutstandingRequests = angular.noop;
+  }
+
+  var browsers = {
+    html5: new FakeBrowser('http://www.host.com/base/path?a=b#h', '/base/index.html'),
+    hashbang: new FakeBrowser('http://www.host.com/base/index.html#!/path?a=b#h', '/base/index.html')
+  };
+
+  function Html5Cntl($scope, $location) {
+    $scope.$location = $location;
+  }
+
+  function HashbangCntl($scope, $location) {
+    $scope.$location = $location;
+  }
+
+  function initEnv(name) {
+    var root = angular.element(document.getElementById(name + '-mode'));
+    angular.bootstrap(root, [function($compileProvider, $locationProvider, $provide){
+      $locationProvider.html5Mode(true).hashPrefix('!');
+
+      $provide.value('$browser', browsers[name]);
+      $provide.value('$document', root);
+      $provide.value('$sniffer', {history: name == 'html5'});
+
+      $compileProvider.directive('ngAddressBar', function() {
+        return function(scope, elm, attrs) {
+          var browser = browsers[attrs.browser],
+              input = angular.element('<input type="text">').val(browser.url()),
+              delay;
+
+          input.bind('keypress keyup keydown', function() {
+            if (!delay) {
+              delay = setTimeout(fireUrlChange, 250);
+            }
+          });
+
+          browser.url = function(url) {
+            return input.val(url);
+          };
+
+          elm.append('Address: ').append(input);
+
+          function fireUrlChange() {
+            delay = null;
+            browser.urlChange(input.val());
+          }
+        };
+      });
+    }]);
+    root.bind('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+
+  initEnv('html5');
+  initEnv('hashbang');
+</script>
+
+</doc:source>
+</doc:example>
+
+
+# Предостережения
+
+## Перезагрузка страницы
+
+Сервис `$location` позволяет изменять только URL; он не позволяет перезагружать страницу. 
+Когда необходимо изменить URL и перезагрузить страницу или перейти на другию страницу, используйте более 
+низкоуровневое API {@link api/ng.$window $window.location.href}.
+
+## Использование $location вне жизненного цикла области видимости
+
+$location знает о жизненном цикле {@link api/ng.$rootScope.Scope области видимости} Angular. Изменение URL 
+в браузере обновляет $location и вызывает функцию $apply для того чтобы уведомить все $watchers/$observers. 
+Когда $location менется в цикле $digest тоже всё хорошо; $location будет распространять свои изменения в браузере 
+и уведомлять о них все $watchers/$observers. При необходимости изменить $location из стороннего кода 
+(например, через события DOM или во время тестирования) нужно вызвать функцию $apply для распространения изменений.
+
+## $location.path() и префиксы ! или /
+
+Адрес всегда начинается со слеша (`/`); и сеттер `$location.path()` добавит его во всех случаях.
+
+Заметьте, что префикс `!` в режиме hashbang не является частью `$location.path()`; это актуально для hashPrefix.
+
+# Тестирование сервиса $location
+
+Если сервис $location используется в тестировании, то вы находитесь вне жизненного цикла {@link api/ng.$rootScope.Scope 
+области видимости}. Это возлагает на вас ответственность за вызов `scope.$apply()`.
+
+<pre>
+describe('serviceUnderTest', function() {
+  beforeEach(module(function($provide) {
+    $provide.factory('serviceUnderTest', function($location){
+      // whatever it does...
+    });
+  });
+
+  it('should...', inject(function($location, $rootScope, serviceUnderTest) {
+    $location.path('/new/path');
+    $rootScope.$apply();
+
+    // test whatever the service should do...
+
+  }));
+});
+</pre>
+
+
+# Переход с более раних релизов AngularJS
+
+В ранних версиях Angular, `$location` использует методы `hashPath` или `hashSearch` для получения пути и строки поиска.
+В этой версии, сервис `$location` получает путь и строку поиска с помощью методов path и search, а затем использует 
+полученную информацию чтобысобрать адрес с использованием hashbang URL 
+(таких как `http://server.com/#!/path?search=a`), когда это необходимо.
+
+## Изменения в коде
+
+<table class="table">
+  <thead>
+    <tr class="head">
+      <th>Навигация внутри приложения</th>
+      <th>Замените на</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td>$location.href = value<br />$location.hash = value<br />$location.update(value)<br
+/>$location.updateHash(value)</td>
+      <td>$location.path(path).search(search)</td>
+    </tr>
+
+    <tr>
+      <td>$location.hashPath = path</td>
+      <td>$location.path(path)</td>
+    </tr>
+
+    <tr>
+      <td>$location.hashSearch = search</td>
+      <td>$location.search(search)</td>
+    </tr>
+
+    <tr class="head">
+      <td>Навигация вне приложения</td>
+      <td>Используйте более низкоуровневое API</td>
+    </tr>
+
+    <tr>
+      <td>$location.href = value<br />$location.update(value)</td>
+      <td>$window.location.href = value</td>
+    </tr>
+
+    <tr>
+      <td>$location[protocol | host | port | path | search]</td>
+      <td>$window.location[protocol | host | port | path | search]</td>
+    </tr>
+
+    <tr class="head">
+      <td>Доступ для чтения</td>
+      <td>Замените на</td>
+    </tr>
+
+    <tr>
+      <td>$location.hashPath</td>
+      <td>$location.path()</td>
+    </tr>
+
+    <tr>
+      <td>$location.hashSearch</td>
+      <td>$location.search()</td>
+    </tr>
+
+    <tr>
+      <td>$location.href<br />$location.protocol<br />$location.host<br />$location.port<br
+/>$location.hash</td>
+      <td>$location.absUrl()<br />$location.protocol()<br />$location.host()<br />$location.port()<br
+/>$location.path() + $location.search()</td>
+    </tr>
+
+    <tr>
+      <td>$location.path<br />$location.search</td>
+      <td>$window.location.path<br />$window.location.search</td>
+    </tr>
+  </tbody>
+</table>
+
+## Двунаправленое связывание с $location
+
+Компилятор Angular пока не поддерживает двунаправленную привязку для следующих методов ({@link
+https://github.com/angular/angular.js/issues/404 здесь}). Если требуется друнаправленная привязка к объекту 
+$location (используя директиву {@link api/ng.directive:input.text ngModel} в поле ввода), нужно будет создать 
+дополнительные свойства модели (например, `locationPath`) с двумя наблюдателями, которые следят за 
+изменением $location в обоих направлениях. Например:
+<pre>
+<!-- html -->
+<input type="text" ng-model="locationPath" />
+</pre>
+<pre>
+// js - контроллер
+$scope.$watch('locationPath', function(path) {
+  $location.path(path);
+});
+
+$scope.$watch('$location.path()', function(path) {
+  scope.locationPath = path;
+});
+</pre>
+
+
+# Связанное API
+
+* {@link api/ng.$location $location API}
+
+
+

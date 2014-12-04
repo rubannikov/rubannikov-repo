@@ -1,0 +1,125 @@
+@ngdoc overview
+@name Cookbook: MVC
+@description
+
+MVC обеспечивает чистое и тестируемое разделение между поведением (контроллер) и видом
+(HTML-шаблон). Контроллер — это обычный класс JavaScript, который трансплантирован в область видимости
+вида. Благодаря этому взаимодействие модели с контроллером и видом очень простое.
+
+Модель представляет собой набор объектов и примитивов на которые ссылается объект области видимости ($scope).
+Это позволяет легко протестировать изолированный контроллер, так как можно просто создать экземпляр контроллера 
+без вида, потому что между ними нет никакой связи.
+
+<doc:example>
+  <doc:source>
+    <script>
+    function TicTacToeCntl($scope, $location) {
+      $scope.cellStyle= {
+        'height': '20px',
+        'width': '20px',
+        'border': '1px solid black',
+        'text-align': 'center',
+        'vertical-align': 'middle',
+        'cursor': 'pointer'
+      };
+
+      $scope.reset = function() {
+        $scope.board = [
+          ['', '', ''],
+          ['', '', ''],
+          ['', '', '']
+        ];
+        $scope.nextMove = 'X';
+        $scope.winner = '';
+        setUrl();
+      };
+
+      $scope.dropPiece = function(row, col) {
+        if (!$scope.winner && !$scope.board[row][col]) {
+          $scope.board[row][col] = $scope.nextMove;
+          $scope.nextMove = $scope.nextMove == 'X' ? 'O' : 'X';
+          setUrl();
+        }
+      };
+
+      $scope.reset();
+      $scope.$watch(function() { return $location.search().board;}, readUrl);
+
+      function setUrl() {
+        var rows = [];
+        angular.forEach($scope.board, function(row) {
+          rows.push(row.join(','));
+        });
+        $location.search({board: rows.join(';') + '/' + $scope.nextMove});
+      }
+
+      function grade() {
+        var b = $scope.board;
+        $scope.winner =
+          row(0) || row(1) || row(2) ||
+          col(0) || col(1) || col(2) ||
+          diagonal(-1) || diagonal(1);
+        function row(row) { return same(b[row][0], b[row][1], b[row][2]);}
+        function col(col) { return same(b[0][col], b[1][col], b[2][col]);}
+        function diagonal(i) { return same(b[0][1-i], b[1][1], b[2][1+i]);}
+        function same(a, b, c) { return (a==b && b==c) ? a : '';};
+      }
+
+      function readUrl(value) {
+        if (value) {
+          value = value.split('/');
+          $scope.nextMove = value[1];
+          angular.forEach(value[0].split(';'), function(row, col){
+            $scope.board[col] = row.split(',');
+          });
+          grade();
+        }
+      }
+    }
+    </script>
+
+    <h3>Крестики-нолики</h3>
+    <div ng-controller="TicTacToeCntl">
+    Сейчас ходят: {{nextMove}}
+    <div class="winner" ng-show="winner">{{winner}} выйграли!</div>
+      <table class="board">
+        <tr ng-repeat="row in board track by $index" style="height:15px;">
+          <td ng-repeat="cell in row track by $index" ng-style="cellStyle"
+              ng-click="dropPiece($parent.$index, $index)">{{cell}}</td>
+        </tr>
+      </table>
+      <button ng-click="reset()">очистить поле</button>
+    </div>
+  </doc:source>
+  <doc:scenario>
+    it('should play a game', function() {
+     piece(1, 1);
+     expect(binding('nextMove')).toEqual('O');
+     piece(3, 1);
+     expect(binding('nextMove')).toEqual('X');
+     piece(1, 2);
+     piece(3, 2);
+     piece(1, 3);
+     expect(element('.winner').text()).toEqual('X выйграли!');
+    });
+
+    function piece(row, col) {
+      element('.board tr:nth-child('+row+') td:nth-child('+col+')').click();
+    }
+  </doc:scenario>
+</doc:example>
+
+
+# На что следует обратить внимание
+
+* Контроллер определен в JavaScript и не содержит ссылок на логику представления.
+* Angular создает экземпляр контроллера и внедряет его в вид.
+* Экземпляр контроллера может быть изолирован (от вида) и код всё равно будет работать. 
+Поэтому его очень легко протестировать.
+* HTML-вид является проекцией модели. В приведенном выше примере модель хранит переменные игрового поля.
+* Все свойства контроллера (такие как board и nextMove) доступны для вида.
+* Изменение модели меняет вид.
+* Из вида можно вызвать любую функцию контроллера.
+* В этом примере функции `setUrl()` и `readUrl()` копируют состояние игры в/из URL-адрес, так что кнопка
+«назад» в браузере будет возвращать к предыдущим шагам. См. внешнее связывание. В этом примере вызывается {@link
+api/ng.$rootScope.Scope#$watch $watch()} чтобы установить наблюдателя, вызывающего `readUrl()` когда необходимо.

@@ -1,0 +1,49 @@
+@ngdoc overview
+@name Cookbook: Настройка модуля (value)
+@description
+
+Использование `value` при настройке модулей
+
+Пример установки значения во время настройки модуля
+<example module="app1">
+  <file name="index.html">
+    <div ng-controller="MyCtrl">
+      {{localText}}
+      {{globalText}}    
+    </div>
+  </file>
+  <file name="script.js">
+    var myModule = angular.module('app1', []);
+    myModule.value('globalText', 'GLOBAL');
+    
+    // Заданное в фазе настройки значение globalText используется в контроллере,
+    // т.к. оно должно быть привязано к какой-либо области видимости
+    myModule.controller('MyCtrl', function ($scope, globalText) {
+      $scope.localText  = 'LOCAL';
+      $scope.globalText = globalText;
+    });
+  </file>
+</example>
+
+Пример, где значение привязывается к глобальной области видимости
+и выводится в методе `run`
+<example module="app2">
+  <file name="index.html">
+    {{globalText}}
+    <div ng-controller="MyCtrl">
+      {{localText}}
+    </div> 
+  </file>
+  <file name="script.js">
+    var myModule = angular.module('app2', []);
+    myModule.value('globalText', 'GLOBAL');
+    myModule.run(function($rootScope, globalText) {
+      //Значение устанавливается в глобальной (корневой) области видимости
+      $rootScope.globalText = globalText;
+    });
+    
+    myModule.controller('MyCtrl', function($scope) {
+      $scope.localText = 'LOCAL';
+    });
+  </file>
+</example>

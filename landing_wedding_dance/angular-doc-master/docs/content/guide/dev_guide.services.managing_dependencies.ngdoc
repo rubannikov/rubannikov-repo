@@ -1,0 +1,109 @@
+@ngdoc overview
+@name Developer Guide: Angular Services: Зависимости сервисов
+@description
+
+Angular позволяет сервисам объявить другие сервисы, в зависимости от того, что необходимо для создания их экземпляров.
+
+Чтобы объявить зависимости, их следует указать в параметрах фабричной функции и также добавить в параметры
+функцию с указанными зависимостями, либо с помощью свойства `$inject`, в виде массива
+строк с идентификаторами, либо с помощью нотации массива. Опционально объявление `$inject`, может быть
+сброшено (см. "Вывод `$inject`", но обратите внимание, что пока это экспериментальная возможность).
+
+Использование нотации массива:
+
+<pre>
+function myModuleCfgFn($provide) {
+  $provide.factory('myService', ['dep1', 'dep2', function(dep1, dep2) {}]);
+}
+</pre>
+
+
+Использование свойства $inject:
+
+<pre>
+function myModuleCfgFn($provide) {
+  var myServiceFactory = function(dep1, dep2) {};
+  myServiceFactory.$inject = ['dep1', 'dep2'];
+  $provide.factory('myService', myServiceFactory);
+}
+</pre>
+
+
+Использование вывода DI (несовместимо с минификаторами):
+
+<pre>
+function myModuleCfgFn($provide) {
+  $provide.factory('myService', function(dep1, dep2) {});
+}
+</pre>
+
+
+Ниже приведен пример двух сервисов, один из которых зависит от другого, и оба
+зависят от других сервисов, которые предоставляются фреймворком Angular:
+
+<pre>
+/**
+ * сервис batchLog помещает сообщения в очередь в памяти и записывает
+ * в console.log каждые 50 секунд.
+ *
+ * @param {*} message Сообщение для регистрации.
+ */
+  function batchLogModule($provide){
+    $provide.factory('batchLog', ['$timeout', '$log', function($timeout, $log) {
+      var messageQueue = [];
+
+      function log() {
+        if (messageQueue.length) {
+          $log('batchLog messages: ', messageQueue);
+          messageQueue = [];
+        }
+        $timeout(log, 50000);
+      }
+
+      // start periodic checking
+      log();
+
+      return function(message) {
+        messageQueue.push(message);
+      }
+    }]);
+
+    /**
+     * routeTemplateMonitor контролирует каждое изменение $route и регистрирует
+     * текущий шаблон через сервис batchLog.
+     */
+    $provide.factory('routeTemplateMonitor',
+                ['$route', 'batchLog', '$rootScope',
+         function($route,   batchLog,   $rootScope) {
+      $rootScope.$on('$routeChangeSuccess', function() {
+        batchLog($route.current ? $route.current.template : null);
+      });
+    }]);
+  }
+
+  // получение главного сервиса для начала применения
+  angular.injector([batchLogModule]).get('routeTemplateMonitor');
+</pre>
+
+На что следует обратить внимание в этом примере:
+
+* Сервис `batchLog` зависит от встроенных сервисов {@link api/ng.$timeout $timeout} и
+{@link api/ng.$log $log}, и дает возможность сообщениям регистрироваться в `console.log` в пакетном режиме.
+* Сервис `routeTemplateMonitor` зависит от встроенного сервиса {@link api/ng.$route
+$route}, а так же нашего сервиса `batchLog`.
+* Оба наших сервиса используют сигнатуру фабричной функции и нотацию массива для внедрения зависимостей. 
+Важно, что порядок строк с идентификаторами в массиве такой же, как и порядок имен аргументов в сигнатуре фабричной функции которую инжектор использует, чтобы определить, какие сервисы и в каком порядке внедрять.
+
+
+## Связанные разделы
+
+* {@link dev_guide.services.understanding_services Понимание сервисов}
+* {@link dev_guide.services.creating_services Создание сервисов}
+* {@link dev_guide.services.injecting_controllers Внедрение сервисов в контроллеры}
+* {@link dev_guide.services.testing_services Тестирование сервисов}
+
+
+## Связанное API
+
+* {@link api/ng API сервисов}
+* {@link api/angular.injector API инжектора}

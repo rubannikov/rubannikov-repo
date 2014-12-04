@@ -1,0 +1,954 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="Description"
+  content="AngularJS это то, чем был бы HTML, если бы он проектировался для веб-приложений.
+           Декларативные шаблоны с data-binding, MVW, MVVM, MVC, dependency injection и превосходная
+           тестируемость всех иннструментов в чистом клиентском JavaScript! Теперь на русском языке!">
+  <title>AngularJS — Супер-героический JavaScript MVW фреймворк</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="home/css/bootstrap.min.css">
+  <link rel="stylesheet" href="home/css/docs.css">
+  <link rel="stylesheet" href="home/css/font-awesome.css">
+  <link href="home/google-code-prettify/prettify.css" type="text/css" rel="stylesheet">
+  <base href="/">
+
+  ﻿<!--[if lte IE 8]>
+    <script>
+      document.createElement('tabs');
+      document.createElement('pane');
+      document.createElement('ng-pluralize');
+    </script>
+  <![endif]-->
+  <script>
+    /*!
+      * $script.js Async loader & dependency manager
+      * https://github.com/ded/script.js
+      * (c) Dustin Diaz, Jacob Thornton 2011
+      * License: MIT
+      */
+    (function(a,b){typeof module!="undefined"?module.exports=b():typeof define=="function"&&define.amd?define(a,b):this[a]=b()})("$script",function(){function q(a,b,c){for(c=0,j=a.length;c<j;++c)if(!b(a[c]))return k;return 1}function r(a,b){q(a,function(a){return!b(a)})}function s(a,b,i){function o(a){return a.call?a():d[a]}function p(){if(!--n){d[m]=1,k&&k();for(var a in f)q(a.split("|"),o)&&!r(f[a],o)&&(f[a]=[])}}a=a[l]?a:[a];var j=b&&b.call,k=j?b:i,m=j?a.join(""):b,n=a.length;return setTimeout(function(){r(a,function(a){if(h[a])return m&&(e[m]=1),h[a]==2&&p();h[a]=1,m&&(e[m]=1),t(!c.test(a)&&g?g+a+".js":a,p)})},0),s}function t(c,d){var e=a.createElement("script"),f=k;e.onload=e.onerror=e[p]=function(){if(e[n]&&!/^c|loade/.test(e[n])||f)return;e.onload=e[p]=null,f=1,h[c]=2,d()},e.async=1,e.src=c,b.insertBefore(e,b.firstChild)}var a=document,b=a.getElementsByTagName("head")[0],c=/^https?:\/\//,d={},e={},f={},g,h={},i="string",k=!1,l="push",m="DOMContentLoaded",n="readyState",o="addEventListener",p="onreadystatechange";return!a[n]&&a[o]&&(a[o](m,function u(){a.removeEventListener(m,u,k),a[n]="complete"},k),a[n]="loading"),s.get=t,s.order=function(a,b,c){(function d(e){e=a.shift(),a.length?s(e,d):s(e,b,c)})()},s.path=function(a){g=a},s.ready=function(a,b,c){a=a[l]?a:[a];var e=[];return!r(a,function(a){d[a]||e[l](a)})&&q(a,function(a){return d[a]})?b():!function(a){f[a]=f[a]||[],f[a][l](b),c&&c(e)}(a.join("|")),s},s})
+
+
+    var _gaq=[
+      ['_setAccount','UA-8594346-3'],
+      ['_setDomainName', '.angularjs.org'],
+      ['_trackPageview'],['_trackPageLoadTime']
+    ];
+
+    $script('https://apis.google.com/js/plusone.js');
+    //$script(('https:'==location.protocol?'//ssl':'http://www')+'.google-analytics.com/ga.js');
+    $script("//platform.twitter.com/widgets.js");
+
+    $script('http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js', function() {
+      $script('home/js/bootstrap.min.js', function() {
+        $().dropdown();
+        bootstrap();
+      });
+      $script('home/google-code-prettify/prettify.min.js', bootstrap);
+      $script('home/js/homepage.js', bootstrap);
+      $script('http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js', bootstrap);
+      $script('http://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular-resource.min.js', bootstrap);
+      $script('http://code.angularjs.org/1.0.6/i18n/angular-locale_ru.js', function() {
+        angular.module('ngLocal.ru', [])._invokeQueue.push(angular.module('ngLocale')._invokeQueue[0]);
+        bootstrap();
+      });
+      $script('http://code.angularjs.org/1.0.6/i18n/angular-locale_en-us.js', function() {
+        angular.module('ngLocal.us', [])._invokeQueue.push(angular.module('ngLocale')._invokeQueue[0]);
+        bootstrap();
+      });
+    });
+
+    function bootstrap() {
+      if (window.prettyPrint && window.$ && $.fn.popover && angular.bootstrap &&
+          hasModule('ngLocal.ru') && hasModule('ngLocal.us') && hasModule('homepage') && hasModule('ngResource')) {
+            $(function(){
+              angular.bootstrap(document, ['homepage', 'ngLocal.us']);
+            });
+      }
+    }
+
+    function hasModule(moduleName) {
+      try {
+        return angular.module(moduleName);
+      } catch (e) {
+        return false;
+      }
+    }
+  </script>
+  <script>
+    /*
+    AngularJS v1.0.6
+    (c) 2010-2012 Google, Inc. http://angularjs.org
+    License: MIT
+    */
+    (function(i){'use strict';function d(c,b,e){return c[b]||(c[b]=e())}return d(d(i,"angular",Object),"module",function(){var c={};return function(b,e,f){e&&c.hasOwnProperty(b)&&(c[b]=null);return d(c,b,function(){function a(a,b,d){return function(){c[d||"push"]([a,b,arguments]);return g}}if(!e)throw Error("No module: "+b);var c=[],d=[],h=a("$injector","invoke"),g={_invokeQueue:c,_runBlocks:d,requires:e,name:b,provider:a("$provide","provider"),factory:a("$provide","factory"),service:a("$provide","service"),
+      value:a("$provide","value"),constant:a("$provide","constant","unshift"),filter:a("$filterProvider","register"),controller:a("$controllerProvider","register"),directive:a("$compileProvider","directive"),config:h,run:function(a){d.push(a);return this}};f&&h(f);return g})}})})(window);
+  </script>
+</head>
+<body  ng-controller="DownloadCtrl">
+  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
+       chromium.org/developers/how-tos/chrome-frame-getting-started -->
+  <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+  <header class="header">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/" style="padding-top: 3px; padding-bottom: 0px;">
+            <img class="AngularJS-small" src="/img/AngularJS-small.png" style="width: auto; height: auto;">
+          </a>
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            <li class="active"><a href="/"><i class="icon-home icon-white"></i> Главная</a></li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-eye-open icon-white"></i> Обучение <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/misc/started">С чего начать</a></li>
+                <li><a href="http://www.youtube.com/user/angularjs">Видео</a></li>
+                <li><a href="/tutorial">Учебник</a></li>
+                <li><a href="http://builtwith.angularjs.org/">Примеры использования</a></li>
+                <li><a href="https://github.com/angular/angular-seed">Шаблонное приложение</a></li>
+                <li><a href="/misc/faq">FAQ</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-book icon-white"></i> Разработка <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/tutorial">Учебник</a></li>
+                <li><a href="/guide/">Руководство разработчика</a></li>
+                <li><a href="/api/">Справочник API</a></li>
+                <li><a href="/ui/">UI-Router</a></li>
+                <li><a href="/cookbook/">Рецепты</a></li>
+                <li><a href="/misc/contribute">Сотрудничество</a></li>             
+                <li><a href="/">Скачать</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-comment icon-white"></i> Обсуждение <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="http://javascript.ru/forum/angular/">Русскоязычный форум</a></li>
+                <li><a href="http://blog.angularjs.org/">Блог</a></li>
+                <li><a href="http://groups.google.com/group/angular">Список рассылки</a></li>
+                <li><a href="http://webchat.freenode.net/?channels=angularjs&uio=d4">Чат</a></li>
+                <li class="divider"></li>
+                <li><a href="https://twitter.com/#!/angularjs">Twitter</a></li>
+                <li><a href="https://plus.google.com/110323587230527980117">Google+</a></li>
+                <li class="divider"></li>
+                <li><a href="https://github.com/angular/angular.js">GitHub</a></li>
+                <li><a href="https://github.com/angular/angular.js/issues">Issue Tracker</a></li>
+                <li class="divider"></li>
+                <li><a href="/misc/translate">Перевод на русский</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+          </ul>
+          <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+            <input type="text" name="as_q" class="search-query" placeholder="Поиск">
+            <input type="hidden" name="as_sitesearch" value="angular.ru">
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div role="main" class="container">
+
+    <div class="row" style="padding-top: 80px;">
+      <div class="span12">
+
+        <div class="hero-unit" style="height: 350px;">
+          <div class="center">
+            <img class="AngularJS-large" src="home/img/AngularJS-large.png">
+          </div>
+          <div class="center">
+            <h1>Супер-героический фреймворк для веб-приложений!</h1>
+            <div style="margin-bottom: 10px">
+              <a href="http://angularjs.org/">Сайт на английском</a> &nbsp; &nbsp;
+              <a href="https://plus.google.com/communities/109003572589840580141">Новости</a> &nbsp; &nbsp;
+              <a href="http://javascript.ru/forum/angular/">Форум</a> &nbsp; &nbsp;
+              <a href="https://github.com/maksimr/angular-doc">Переводы на Гитхабе</a>
+            </div>
+          </div>
+          <div class="center">
+            <a class="btn btn-large" href="https://github.com/angular/angular.js">
+              <i class="icon-github-sign"></i> Смотреть на GitHub
+            </a>
+            <span class="spacer"></span>
+
+            <a class="btn btn-large btn-primary" href="https://github.com/angular/angular.js/archive/master.zip" ng-click="lightbox('stable')">
+              <i class="icon-download-alt icon-large"></i> Скачать
+            </a>
+
+          </div>
+          <ul class='quick-links'>
+            <li class="google-follow">
+              Follow +AngularJS on
+              <a href="https://plus.google.com/110323587230527980117?prsrc=3" rel="publisher" style="text-decoration:none;"><img src="https://ssl.gstatic.com/images/icons/gplus-32.png" alt="" style="border:0;width:20px;height:20px;"/></a>
+            </li>
+            <li style="width: 120px; height: 25px;">
+              <g:plusone size="medium" annotation="inline" width="120" href="http://angularjs.org"></g:plusone>
+            </li>
+            <li style="width: 220px; height: 25px;">
+              <a href="https://twitter.com/angularjs" class="twitter-follow-button" data-show-count="true">Follow @angularjs</a>
+            </li>
+            <li style="width: 107px; height: 25px;">
+              <a href="https://twitter.com/share" class="twitter-share-button"
+                 data-url="http://angularjs.org" data-text="AngularJS - улучшенный HTML для веб-приложений" data-via="angularjs">Tweet</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="row first">
+      <div class="span4">
+        <h1>Почему AngularJS?</h1>
+        <p>
+          HTML отлично подходит для описания статичных документов, но спотыкается при попытке  
+          описать динамические виды в веб-приложениях. AngularJS позволяет расширить
+          синтаксис HTML. В результате код получается выразительным, читаемым, и легко поддерживается.
+        </p>
+      </div>
+      <div class="span4">
+        <h1>Альтернативы</h1>
+        <p>
+          Другие фреймворки обходят недостатки HTML либо абстрагируясь от HTML, CSS, и/или JavaScript,
+          либо навязывая обязательные инструменты для манипулирования DOM. Ни один из этих способов
+          ни устраняет суть проблемы, а именно то, что HTML не предназначен для динамических приложений.
+        </p>
+      </div>
+      <div class="span4">
+        <h1>Расширяемость</h1>
+        <p>
+          AngularJS — это набор инструментов для построения фреймворка, наиболее подходящего для создания 
+          веб-приложения. Он расширяем и отлично взаимодействует с другими библиотеками. Любая особенность
+          может быть изменена или заменена в соответствии с уникальным путем развития и потребностями вашего приложения. 
+          Читайте далее, чтобы узнать как.
+        </p>
+      </div>
+    </div>
+
+    <h1 id="the-basics">Основы</h1>
+    <div class="row example">
+      <div class="span8 app-source" app-source="hello.html" annotate="hello.annotation"></div>
+      <div class="span4">
+        <span hint></span>
+        <span class="pull-right" js-fiddle="hello.html"></span>
+        <div class="tabs-spacer"></div>
+        <div app-run="hello.html" class="well"></div>
+        <h3>Процесс разработки</h3>
+        <div class="video-img" data-toggle="modal" data-video="http://www.youtube.com/embed/uFTFsKmkQnQ?&autoplay=1" href="#videoModal">
+          <img class="video" src="home/img/video.png">
+        </div>
+      </div>
+    </div>
+
+
+
+    <h1 id="add-some-control">Управление</h1>
+    <div class="row">
+      <div class="span4">
+        <h3>Связывание данных</h3>
+        <p>
+          Связывание данных — это способ автоматического обновления вида при изменении модели,
+          а также обновление модели при изменении вида. Удивительно, но это
+          исключает DOM-манипуляции из списка вещей, о которых нужно беспокоиться.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Контроллер</h3>
+        <p>
+          Контроллеры добавляют поведение DOM-элементам. AngularJS позволяет описать
+          поведение в простой форме без шаблонного обновления DOM,
+          регистрации колбэков или сканирования изменений модели.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Ясный JavaScript</h3>
+        <p>
+          В отличие от других фреймворков, нет необходимости наследоваться от собственных типов; оборачивать
+          модель методами доступа. Только старый добрый JavaScript. Это позволяет легко тестировать код,
+          обслуживать, повторно использовать и опять же освободить от шаблонов.
+        </p>
+      </div>
+    </div>
+    <div class=" row example">
+      <div class="span8 app-source" app-source="todo.html todo.js todo.css" annotate="todo.annotation"></div>
+      <div class="span4">
+        <span hint></span>
+        <span class="pull-right" js-fiddle="todo.html todo.js todo.css"></span>
+        <div class="tabs-spacer"></div>
+        <div app-run="todo.html" class="well"></div>
+        <h3>Процесс разработки</h3>
+        <div class="video-img" data-toggle="modal" data-video="http://www.youtube.com/embed/WuiHuZq_cg4?&autoplay=1" href="#videoModal">
+          <img class="video" src="home/img/video.png">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal hide fade" style="display: none;" id="videoModal">
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>Список дел на AngularJS</h3>
+      </div>
+      <div class="modal-body">
+      </div>
+    </div>
+
+
+    <h1 id="wire-up-a-backend">Связь с сервером</h1>
+    <div class="row">
+      <div class="span4">
+        <h3>Внешнее связывание</h3>
+        <p>
+          Внешняя связь показывает в каком месте приложения находится пользователь. Это полезно, так как 
+          пользователи смогут создавать закладки и отправлять ссылки на элементы приложения по электронной почте. 
+          Для многостраничных приложений это не проблема, но AJAX-приложения по своей природе не такие. 
+          AngularJS сочетает в себе преимущества внешнего связывания с поведением десктопного приложения.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Валидация форм</h3>
+        <p>
+          Проверка форм на стороне клиента важна, т.к. делает приложение удобнее для пользователей.
+          AngularJS позволяет задавать правила проверки формы без необходимости писать
+          JavaScript код. Пишешь меньше кода — пьешь больше пива.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Обмен данными</h3>
+        <p>
+          AngularJS содержит сервисы высокоуроневого XHR, что существенно упрощает код. Мы обернули XHR,
+          чтобы предоставить исключительное управление и обещание. Обещание еще больше упростить код при обработке
+          асинхронно-полученных данных. Это позволяет назначать свойства синхронно, тогда как получение на самом деле
+          асинхронное.
+        </p>
+      </div>
+    </div>
+    <div class=" row example">
+      <div class="span8 app-source" app-source="project.html project.js list.html detail.html mongolab.js" resource="resource" annotate="project.annotation" module="project"></div>
+      <div class="span4">
+        <span hint></span>
+        <span class="pull-right" js-fiddle="project.html list.html detail.html project.js mongolab.js" resource="resource" module="project"></span>
+        <div class="tabs-spacer"></div>
+        <!--[if lt IE 10]>
+          <div class="alert alert-error">
+            Your browser doesn't support <a href="http://www.w3.org/TR/cors/">CORS</a>, therefore
+            it can not fetch data from an external domain resulting in no projects shown in this example.
+          </div>
+        <![endif]-->
+        <div app-run="project.html" module="project" class="well"></div>
+      </div>
+    </div>
+
+
+
+    <h1 id="create-components">Создание компонентов</h1>
+    <div class="row">
+      <div class="span4">
+        <h3>Директивы</h3>
+        <p>
+          Директивы - это уникальная и мощная особенность, доступная только в Angular.
+          Директивы позволяют изобретать новый HTML синтаксис, специально под конкретное приложение.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Повторное использование</h3>
+        <p>
+          Мы используем директивы для создания повторно используемых компонентов.
+          Компонент позволяет скрыть сложную DOM-структуру, CSS и поведение.
+          Что позволяет сфокусировать внимание, на том что приложение делает или
+          как оно выглядит.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Локализация</h3>
+        <p>
+          Одна из важнейших особенностей серьёзного приложения - локализация.
+          Angular содержит фильтры и директивы которые помогут сделать приложение 
+          доступным для разных языков и культур.
+        </p>
+      </div>
+    </div>
+    <div class=" row example">
+      <div class="span8 app-source" app-source="tabs.html components.js beers.js" annotate="tabs.annotation" module="components"></div>
+      <div class="span4">
+        <span hint></span>
+        <span class="pull-right" js-fiddle="tabs.html components.js beers.js" module="components"></span>
+        <div class="tabs-spacer"></div>
+        <h4>Locale: US</h4>
+        <div app-run="tabs.html" module="components-us" class="well"></div>
+        <div class="tabs-spacer"></div>
+        <h4>Locale: RU</h4>
+        <div app-run="tabs.html" module="components-ru" class="well"></div>
+      </div>
+    </div>
+
+
+
+    <h1 id="embed-and-inject"> Встраивание и внедрение</h1>
+    <div class="row">
+      <div class="span4">
+        <h3>Встраиваемость</h3>
+        <p>
+          AngularJS превосходно работает с другими технологиями.
+          Вы сами выбираете что использовать из AngularJS в приложении.
+          Большинство фреймворков требуют полного контроля над всей страницей (приложением).
+          Эта же страница состоит из нескольких AngularJS приложений встроенных в нее.
+          Так как AngularJS не требует контроля над всей страницей, то несколько приложений могут
+          быть запущены на одной странице без необходимости использовать <code>iframe</code>.
+          Рекомендуем открыть исходный код этой страницы (view-source) и посмотреть как он выглядит.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Внедряемость</h3>
+        <p>
+          Внедрение зависимости (Dependency injection) в AngularJS позволяет
+          декларативно описывать взаимосвязи внутри приложения. Это означает
+          что приложение не нуждается в методе main(), который, как правило, создает беспорядок.
+          Внедрение зависимостей является одной из ключевых особенностей AngularJS. Это
+          означает что любой компонент, который не соответствует вашим потребностям, может
+          быть легко заменен.
+        </p>
+      </div>
+      <div class="span4">
+        <h3>Тестируемость</h3>
+        <p>
+          AngularJS был спроектирован так, чтобы максимально облегчить тестирование.
+          Он отделяет представление от поведения, уже имеет в комплекте mock'и, и
+          по полной использует внедрение зависимости. Так же в AngularJS встроен
+          движок для комплексных (end-to-end) тестов, который
+          избавляет от множества проблем, так он знает как устроен AngularJS изнутри.
+        </p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="pull-right"><a href="//angular.ru/#" target="_self">Наверх</a></p>
+      <p>Супер-разработка Google, супер-перевод на русский язык tamtakoe, maksimr, vsorlov, altbog, alvas, madhead, DWand, Chiuaua, davetoxa, nikolaifedorov и др. ©2010-2013</p>
+      <p>Лицензия на исходный код
+        <a href="https://github.com/angular/angular.js/blob/master/LICENSE" target="_blank">The
+          MIT License</a>. Лицензия на документацию <a
+            href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.
+      </p>
+    </div>
+  </footer>
+
+  <!-- JavaScript at the bottom for fast page loading -->
+  <!-- end scripts -->
+
+  <div class="hello-code">
+    <!-- ============== Hello ============== -->
+
+    <script type="text/ng-template" id="hello.html">
+      <div>
+        <label>Имя:</label>
+        <input type="text" ng-model="yourName" placeholder="Введите свое имя">
+        <hr>
+        <h1>Привет {{yourName}}!</h1>
+      </div>
+    </script>
+    <script type="text/ng-template" id="hello.annotation">
+      { "hello.html":
+          { "ng-app": "Говорит AngularJS чтобы он обрабатывал эту часть страницы. В нашем случае весь документ."
+          , "angular.min.js": "Загрузка AngularJS."
+          , "ng-model": "Связывает форму с моделью. Это значит, что любые изменения в форме обновят данные модели, а при изменении модели обновится форма (в нашем случае поле ввода). Попробуйте! Введите текст в поле и увидите обновление строки ниже."
+          , "{{yourName}}": "Конструкция <code>{{ }}</code> указывает на место связывания данных в HTML. AngularJS будет автоматически обновлять это место при любом изменении свойства <code>yourName</code>."
+          }
+      }
+    </script>
+  </div>
+  <div class="todo-code">
+    <!-- ============== TODO ============== -->
+    <style type="text/css" id="todo.css">
+      .done-true {
+        text-decoration: line-through;
+        color: grey;
+      }
+    </style>
+    <script id="todo.js">
+      function TodoCtrl($scope) {
+        $scope.todos = [
+          {text:'learn angular', done:true},
+          {text:'build an angular app', done:false}];
+
+        $scope.addTodo = function() {
+          $scope.todos.push({text:$scope.todoText, done:false});
+          $scope.todoText = '';
+        };
+
+        $scope.remaining = function() {
+          var count = 0;
+          angular.forEach($scope.todos, function(todo) {
+            count += todo.done ? 0 : 1;
+          });
+          return count;
+        };
+
+        $scope.archive = function() {
+          var oldTodos = $scope.todos;
+          $scope.todos = [];
+          angular.forEach(oldTodos, function(todo) {
+            if (!todo.done) $scope.todos.push(todo);
+          });
+        };
+      }
+    </script>
+    <script type="text/ng-template" id="todo.html">
+      <h2>Список дел</h2>
+      <div ng-controller="TodoCtrl">
+        <span>Осталось {{remaining()}} из {{todos.length}}</span>
+        [ <a href="" ng-click="archive()">архив</a> ]
+        <ul class="unstyled">
+          <li ng-repeat="todo in todos">
+            <input type="checkbox" ng-model="todo.done">
+            <span class="done-{{todo.done}}">{{todo.text}}</span>
+          </li>
+        </ul>
+        <form ng-submit="addTodo()">
+          <input type="text" ng-model="todoText"  size="30"
+                 placeholder="впишите новое дело">
+          <input class="btn-primary" type="submit" value="добавить">
+        </form>
+      </div>
+    </script>
+    <script type="text/ng-template" id="todo.annotation">
+      { "todo.html":
+        { "ng-app": "Говорит AngularJS чтобы он обрабатывал эту часть страницы. В нашем случае весь документ."
+        , "angular.min.js": "Загрузка AngularJS."
+        , "todo.js": "Поведение списка описано в JavaScript-контроллерах."
+        , "ng-controller": "Поведение содержимого в рамках этого элемента будет управляться с помощью класса <code>TodoCtrl</code>, определенного в <code>todo.js</code>."
+        , "{{remaining()}}": "Конструкция <code>{{ }}</code> указывает на место связывания данных в HTML. AngularJS автоматически обновит  это место если функция <code>remaining()</code> вернет значение, отличное от предыдущего"
+        , "ng-click": "Вместо регистрации обработчиков событий определяется метод контроллера, который будет вызван. В этом примере при щелчке будет вызван метод <code>archive()</code>."
+        , "ng-repeat": "Используйте <code>ng-repeat</code> чтобы показать набор. Здесь для каждого элемента <code>todos</code>, AngularJS создаст копию элемента <code>&lt;li&gt;</code>. Когда объекты будут добавлены в набор <code>todos</code> <code>ng-repeat</code> автоматически добавит новые элементы <code>&lt;li&gt;</code> в DOM. Точно так же, при удалении объектов из <code>todos</code> соответствующие элементы <code>&lt;li&gt;</code> удалятся. Это одна изнаиболее универсальных директив AngularJS."
+        , "ng-model": "Связывает форму с моделью. Это значит, что любые изменения в форме обновят данные модели, а при изменении модели обновятся элементы формы. AngularJS автоматически копирует состояние чекбокса в <code>todo.done</code>. И наоборот, если обновится <code>todo.done</code> чекбокс изменится соответствующим образом."
+        , "{{todo.done}}": "Чтобыпоказать зачеркивание для завершенных задач, мы создали CSS-класс <code>done-true</code>. Когда <code>todo.done</code> становится <code>true</code>, то CSS-селектор становится <code>done-true</code> и к нему затем применяется зачеркивание."
+        , "ng-submit": "Перехватывает событие отправки формы и вместо этого вызывает <code>addTodo()</code>. В этом методе мы читаем свойство <code>todoText</code> и вставляем его в набор <code>todos</code>."
+        }
+
+      , "todo.css":
+        { ".done-true": "Добавляет зачеркивание к выполненому делу."
+        }
+
+      , "todo.js":
+        { "TodoCtrl": "Контроллер это код, позади представления. Хорошо видно, как ведет себя приложение, потому что в нем нет никаких DOM-манипуляций или специальных шаблонов фреймворка. Только простой, читаемый JavaScript."
+        , "$scope": "<code>$scope</code> содержит данные модели. Это связующее звено между контроллером и видом. <code>$scope</code> всего лишь один из сервисов, внедренных в контроллер."
+        , "todos": "Мы создали модель с двумя делами в списке.Обратите внимание, что вашей модели нужно просто присвоить <code>$scope</code> и AngularJS отразитсостояние в пользовательском интерфейсе самостоятельно. Модель данных это старый-добрый объект JavaScript, который не нужно чем либо оборачивать или изменять свойства через специальные сеттеры."
+        , "addTodo": "Мы назначаем поведение в <code>$scope</code> так чтобы <code>ng-click</code> мог его вызвать."
+        , "push": "Неизменяемый метод <code>Array.push</code>. Его вызов обновляет модель, которая затем обновляет вид посредством связывания данных. <code>ng&ndash;repeat</code> связан с этим массивом. Он автоматически проходится по массиву и добавляет новый DOM-элемент в вид. (см. <code>ng&ndash;repeat</code> на вкладке <code>index.html</code>.)"
+        , "todoText": "Из-за двунаправленного связывания данных модель всегда находится в актуальном состоянии. Это означает, что мы можем запросто читать состояние пользовательского ввода. Нет необходимости регистрировать колбэки, обработчики событий или зависимости из API фреймворка."
+        , "''": "Записать что-либо в поле ввода в форме так же легко. Связывание данных будет всё прозрачно контроллировать"
+        , "remaining": "Вычисленное свойство. Его не нужно определять и беспокоится о его обновлении."
+        , "[]": "В любое время можно заменить модель новым экземпляром без какой-либо регистрации наблюдателей за моделью"
+        }
+      }
+    </script>
+  </div>
+  <div class="project-code">
+    <!-- ============== Projects ============== -->
+    <style type="text/css" id="project.css">
+      table { text-align: left; }
+      table td, table th {
+        vertical-align: top;
+        padding: 0 .25em;
+      }
+    </style>
+    <script id="mongolab.js">
+      // Модуль для облачного хранения данных в - https://mongolab.com
+      angular.module('mongolab', ['ngResource']).
+          factory('Project', function($resource) {
+            var Project = $resource('https://api.mongolab.com/api/1/databases' +
+                '/angularjs/collections/projects/:id',
+                { apiKey: '4f847ad3e4b08a2eed5f3b54' }, {
+                  update: { method: 'PUT' }
+                }
+            );
+
+            Project.prototype.update = function(cb) {
+              return Project.update({id: this._id.$oid},
+                  angular.extend({}, this, {_id:undefined}), cb);
+            };
+
+            Project.prototype.destroy = function(cb) {
+              return Project.remove({id: this._id.$oid}, cb);
+            };
+
+            return Project;
+          });
+    </script>
+    <script id="project.js">
+      angular.module('project', ['mongolab']).
+        config(function($routeProvider) {
+          $routeProvider.
+            when('/', {controller:ListCtrl, templateUrl:'list.html'}).
+            when('/edit/:projectId', {controller:EditCtrl, templateUrl:'detail.html'}).
+            when('/new', {controller:CreateCtrl, templateUrl:'detail.html'}).
+            otherwise({redirectTo:'/'});
+        });
+
+
+      function ListCtrl($scope, Project) {
+        $scope.projects = Project.query();
+      }
+
+
+      function CreateCtrl($scope, $location, Project) {
+        $scope.save = function() {
+          Project.save($scope.project, function(project) {
+            $location.path('/edit/' + project._id.$oid);
+          });
+        }
+      }
+
+
+      function EditCtrl($scope, $location, $routeParams, Project) {
+        var self = this;
+
+        Project.get({id: $routeParams.projectId}, function(project) {
+          self.original = project;
+          $scope.project = new Project(self.original);
+        });
+
+        $scope.isClean = function() {
+          return angular.equals(self.original, $scope.project);
+        }
+
+        $scope.destroy = function() {
+          self.original.destroy(function() {
+            $location.path('/list');
+          });
+        };
+
+        $scope.save = function() {
+          $scope.project.update(function() {
+            $location.path('/');
+          });
+        };
+      }
+    </script>
+    <script type="text/ng-template" id="project.html">
+      <h2>JavaScript-проекты</h2>
+      <div ng-view></div>
+    </script>
+    <script type="text/ng-template" id="list.html">
+      <input type="text" ng-model="search" class="search-query" placeholder="Search">
+      <table>
+        <thead>
+        <tr>
+          <th>Проект</th>
+          <th>Описание</th>
+          <th><a href="#/new"><i class="icon-plus-sign"></i></a></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="project in projects | filter:search | orderBy:'name'">
+          <td><a href="{{project.site}}" target="_blank">{{project.name}}</a></td>
+          <td>{{project.description}}</td>
+          <td>
+            <a href="#/edit/{{project._id.$oid}}"><i class="icon-pencil"></i></a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </script>
+    <script type="text/ng-template" id="detail.html">
+      <form name="myForm">
+        <div class="control-group" ng-class="{error: myForm.name.$invalid}">
+          <label>Название</label>
+          <input type="text" name="name" ng-model="project.name" required>
+          <span ng-show="myForm.name.$error.required" class="help-inline">
+              не заполнено</span>
+        </div>
+
+        <div class="control-group" ng-class="{error: myForm.site.$invalid}">
+          <label>Сайт</label>
+          <input type="url" name="site" ng-model="project.site" required>
+          <span ng-show="myForm.site.$error.required" class="help-inline">
+              не заполнено</span>
+          <span ng-show="myForm.site.$error.url" class="help-inline">
+              не URL</span>
+        </div>
+
+        <label>Описание</label>
+        <textarea name="description" ng-model="project.description"></textarea>
+
+        <br>
+        <a href="#/" class="btn">Отмена</a>
+        <button ng-click="save()" ng-disabled="isClean() || myForm.$invalid"
+                class="btn btn-primary">Сохранить</button>
+        <button ng-click="destroy()"
+                ng-show="project._id" class="btn btn-danger">Удалить</button>
+      </form>
+    </script>
+    <script type="text/ng-template" id="project.annotation">
+    { "project.html":
+       { "ng-app": "Говорит AngularJS чтобы он обрабатывал эту часть страницы. В нашем случае весь документ."
+       , "project": "<code>ng-app</code> активирует модуль <code>project</code> для этого фрагмента страницы. Это позволяет иметь модули работающие в разных частях страницы."
+       , "angular.min.js": "Загрузка AngularJS."
+       , "angular-resource.min.js": "Загрузка ресурсного модуля AngularJS."
+       , "project.js": "Файл <code>project.js</code> содержит контроллеры, определяющие специфичное поведение приложения."
+       , "mongolab.js": "Здесь определен модуль AngularJS, необходимый для подключения приложения к БД на <code>http://mongolab.com</code> для хранения данных."
+       , "ng-view": "Мы помечаем этот <code>&lt;div&gt;</code> как место куда загрузим части страниц или «вид». Остальная страница останется статичной в то время как изменения интерфейса будут происходить только в этой области. В нашем случае мы будем переключаться между списком «проектов» и формой добавления/изменения отдельного «проекта»."
+       }
+     , "project.js":
+       { "project": "Определяет модуль <code>project</code> module. Можно использовать модули для настройки существующих сервисов, а так же определять новые сервисы, директивы, фильтры и т. д.. Здесь мы задаем «маршруты» URL-адресов, которые сопоставляются подгружаемым частям вида. AngularJS следит за адресной строкой и автоматически обновляет части вида при изменении URL."
+       , "mongolab": "Модули могут зависить от других модулей. Здесь <code>project</code> нуждается в <code>mongolab</code> который обрабатывает сохранение данных приложения."
+       , "config": "<code>config()</code> используется для настройки существующих сервисов. Здесь настраивается <code>$routeProvider</code>, который отвечает за отображение URL-адресов для частей вида."
+       , "when": "Когда URL представляет собой <code>/</code> то <code>list.html</code> будет загружен в вид и прикреплен к контроллеру <code>ListCtrl</code>. Можно мгновенно обозрить структуру приложения, прочитав определения маршрутов."
+       , "/edit/:projectId": "Определение этого маршрута содержит двоеточие ':'. Двоеточие используется чтобы сделать компонент URL доступным для контроллера. Так что теперь <code>EditCtrl</code> может ссылаться на свойство <code>projectId</code> которое говорит, какой проект нужно отредактировать."
+       , "otherwise": "Маршрут <code>otherwise</code> определяет какой вид будет показан, если URL не соответствует ни одному маршруту. Задан по умолчанию."
+       , "Project": "<code>Project</code> это класс для хранения и доступа к данным приложения. Он определен в модуле <code>mongolab.js</code> и автоматически внедрен в контроллер. Он необходим для абстракции связи с сервером. Это позволяет контроллеру сфокусироваться на поведении, а не заморачиваться с доступом к серверу."
+       , "query": "Метод <code>query</code> запрашивает список проектов <code>Project</code> с сервера. Обратите внимание, что запрос осуществляется асинхронно, но мы записываем его без использования колбека, как будто он синхронный. Это очень круто! Здесь <code>query</code> возвращает то, что называется обещанием. Когда же данные в итоге прийдут с сервера, обещание будет выполнено и связывание данных в AngularJS автоматически обновит данные везде, где они используются."
+       , "$location": "Используйте сервис <code>$location</code> для доступа к адресной строке браузера."
+       , "path": "Используйте метод <code>path</code> чтобы изменить положение 'внешнего связывания' в приложении. Изменение URL будет автоматически активировать новый маршрут и отображение соответствующего вида — в нашем случае вида <code>/edit/</code>."
+       , "$routeParams": "Здесь мы просим AngularJS внедрить сервис <code>$routeParams</code>.  Мы используем его для доступа к параметрам, извлеченным из определений пути маршрута."
+       , "projectId": "Извлекает <code>projectId</code> из URL. это позволяет контроллеру использовать информацию внешнего связывания для обработки."
+       , "original": "Сохраняем оригинальную копию <code>Project</code>, чтобы можно было определить именил ли пользователь форму."
+       , "isClean": "Определяет внес ли пользователь изменения в форму. Эта информация используется для активации кнопки «Сохранить»."
+       , "destroy": "Вызывается когда пользователь щелкает на кнопку «Удалить»."
+       , "save": "Вызывается когда пользователь щелкает на кнопку «Сохранить»."
+       }
+     , "list.html":
+       { "ng-model": "Cвязывает поле ввода со свойством <code>search</code>. Свойство используется для фильтрации только в проектах, содержащих пользовательский текст."
+       , "#/new": "Ссылка на новый <code>/new</code> маршрут определена в <code>projects.js</code>. Обратите внимание, что мы следуем духу веб. Нет необходимости регистрироваться обратные вызовы на ссылки и мы просто перемещаемся на новый URL. Автоматически обновляется история браузера и создаются внешние связи. Но, в отличие от многостраничного приложения, всё это происходит без перезагрузки страницы."
+       , "ng-repeat": "Используйте <code>ng-repeat</code> для показа набора. Здесь для каждого проекта в <code>projects</code> AngularJS создаст копию элемента <code>&lt;tr&gt;</code>."
+       , "filter": "<code>filter</code> использует <code>search</code> чтобы вернуть подмножество элементов из массива <code>projects</code>. При вводе текста, <code>filter</code> сузит список в соответствии с заданными критериями. <code>ng-repeat</code> добавит или удалит элементы из таблицы."
+       , "orderBy": "Возвращает список <code>project</code>, отсортированный по свойству <code>name</code>."
+       , "#/edit/{{project._id.$oid}}": "Создает уникальные ссылки, путем внедрения id проектов в URL. Встроенный id проекта способствует внешнему связыванию, работе кнопки назад, а так же для связи с <code>EditCtrl</code>, позволяющим отредактировать проект."
+       }
+     , "detail.html":
+       { "myForm": "Создание формы с именем <code>myForm</code>. Здесь объявим правила валидации формы, которые будем использовать, чтобы показать ошибки ввода и отключить кнопки."
+       , "ng-class": "CSS класс <code>error</code> добавляется когда в <code>myForm</code> поле ввода <code>name</code> некорректно."
+       , "required": "Поле ввода недействительно если не вводится текст."
+       , "ng-show": "Показать это сообщение об ошибке когда в <code>myForm</code> поле ввода <code>name</code> имеет <code>required</code> выдавший ошибку."
+       , "url": "Тип URL автоматически задействует специальную проверку для URL."
+       , "ng-disabled": "Отключает кнопку 'сохранить' когда форма не заполнена или некорректна."
+       }
+     , "mongolab.js":
+       { "'mongolab'": "Объявление модуля <code>mongolab</code>. Можно использовать модули для настройки существующих сервисов, а так же определить новые сервисы, директивы, фильтры, и т. д. Здесь мы создали класс <code>Project</code> для абстрагирования от связи с сервером."
+       , "'ngResource'": "Зависимость от AngularJS-модуля <code>ngResource</code> который обеспечивает общий интерфейс для RESTful сервисов."
+       , "factory": "Используйте метод модуля <code>factory</code> для определения новых сервисов. Любые, определенные здесь, сервисы  будут затем внедрены в любое место приложения, где они потребуются."
+       , "Project": "Определение сервисов для ресурсного класса <code>Project</code>. Класс будет представлять данные, связанные с каждым проектом 'project'. Так же в нем есть методы для хранения и получения данных."
+       , "$resource": "<code>$resource</code> это сервис, используемый для создания ресурсных классов. Ресурсные классы поставляются с предварительно настроенными методами <code>query()</code>, <code>get()</code>, <code>save()</code> и <code>remove()</code> в качестве API для связи с сервером. Кроме того, класс может быть расширен дополнительным поведением для вашего приложения."
+       , "apiKey": "Параметр URL-запроса, который должен быть отправлен со всеми запросами в движок хранилища данных <code>mongolab</code>."
+       , "update": "Определяем метод <code>update()</code> в ресурсе. Он будет использовать HTTP-метод <code>PUT</code> в запросе."
+       , "prototype": "Здесь мы расширяем класс ресурса методами, специфичными для движка нашего приложения."
+       }
+     }
+    </script>
+  </div>
+  <div class="tabs-code">
+    <!-- ============== Tabs ============== -->
+    <script id="components.js">
+      angular.module('components', []).
+        directive('tabs', function() {
+          return {
+            restrict: 'E',
+            transclude: true,
+            scope: {},
+            controller: function($scope, $element) {
+              var panes = $scope.panes = [];
+
+              $scope.select = function(pane) {
+                angular.forEach(panes, function(pane) {
+                  pane.selected = false;
+                });
+                pane.selected = true;
+              }
+
+              this.addPane = function(pane) {
+                if (panes.length == 0) $scope.select(pane);
+                panes.push(pane);
+              }
+            },
+            template:
+              '<div class="tabbable">' +
+                '<ul class="nav nav-tabs">' +
+                  '<li ng-repeat="pane in panes" ng-class="{active:pane.selected}">'+
+                    '<a href="" ng-click="select(pane)">{{pane.title}}</a>' +
+                  '</li>' +
+                '</ul>' +
+                '<div class="tab-content" ng-transclude></div>' +
+              '</div>',
+            replace: true
+          };
+        }).
+        directive('pane', function() {
+          return {
+            require: '^tabs',
+            restrict: 'E',
+            transclude: true,
+            scope: { title: '@' },
+            link: function(scope, element, attrs, tabsCtrl) {
+              tabsCtrl.addPane(scope);
+            },
+            template:
+              '<div class="tab-pane" ng-class="{active: selected}" ng-transclude>' +
+              '</div>',
+            replace: true
+          };
+        })
+    </script>
+    <script>
+      angular.module('components-us', ['components', 'ngLocal.us']);
+      angular.module('components-ru', ['components', 'ngLocal.ru']);
+    </script>
+    <script id="beers.js">
+      function BeerCounter($scope, $locale) {
+        $scope.beers = [0, 1, 2, 3, 4, 5, 6];
+        if ($locale.id == 'en-us') {
+          $scope.beerForms = {
+            0: 'no beers',
+            one: '{} beer',
+            other: '{} beers'
+          };
+        } else {
+          $scope.beerForms = {
+            0: 'нет водки',
+            one: '{} водка',
+            few: '{} водки',
+            many: '{} водок',
+            other: '{} водок'
+          };
+        }
+      }
+    </script>
+    <script type="text/ng-template" id="tabs.html">
+      <tabs>
+        <pane title="Локализация">
+          Дата: {{ '2012-04-01' | date:'fullDate' }} <br>
+          Валюта: {{ 123456 | currency }} <br>
+          Число: {{ 98765.4321 | number }} <br>
+        </pane>
+        <pane title="Множ. число">
+          <div ng-controller="BeerCounter">
+            <div ng-repeat="beerCount in beers">
+              <ng-pluralize count="beerCount" when="beerForms"></ng-pluralize>
+            </div>
+          </div>
+        </pane>
+      </tabs>
+    </script>
+    <script type="text/ng-template" id="tabs.annotation">
+      { "tabs.html":
+        { "components": "<code>ng-app</code> активирует модуль <code>component</code> для этой части страницы. Модуль содержит расширение HTML для <code>&lt;tabs&gt;</code> и <code>&lt;pane&gt;</code> компонентов."
+        , "tabs": "Мы расширили синтаксис HTML определением элемента <code>tabs</code>. The <code>tabs</code> абстрагирует HTML структуру и поведение, необходимые для показа вкладок. В результате получается более читаемый вид и синтаксис, который можно легко использовать несколько раз."
+        , "pane": "Опять же мы расширили синтаксис HTML-словаря обычным элементом <code>pane</code>. Элемент <code>pane</code> отображает панели для каждой вкладки. В результате получается более читаемый вид."
+        , "title": "Компоненты могут принимать входные параметры в виде HTML-атрибутов. В этом случае атрибут <code>title</code> определяет текст вкладки."
+        , "Localization": "Пример демонстрирует особенности локализации в AngularJS: даты, числа и форматирования валюты."
+        , "Pluralization": "Пример демонстрирует особенность изменения по числам в AngularJS. Обратите внимание, что форма множественного числа 'водка' изменена в русской 'RU' локали на ноль, одна, две и пять водок."
+        , "BeerCounter": "Мы используем контроллер <code>BeerCounter</code> для настроеки правил склонения, зависящих от локали."
+        , "ng-pluralize": "Директива <code>ng-pluralize</code> подставляет нужный формат множественного числа для каждой локали. В отличие от английского, другие языки часто имеет сложные правила склонения во множественном числе."
+        , "count": "Связано с номером свойства. Счетчик превращается в селектор для выбора множественного числа"
+        , "when": "Связано с правилами склонения во множественном числе. Правила являются уникальными для каждой локали и языковых комбинаций."
+        }
+      , "components.js":
+        { "directive": "Использование метода модуля <code>directive()</code> для определения нового словаря HTML для наших компонентов. "
+        , "tabs": "Определение <code>&lt;tabs&gt;</code> компонента."
+        , "controller": "Как и приложение, компонент может иметь контроллер, который обеспечивает поведение компонента."
+        , "$element": "Текущий DOM-элемент компонента."
+        , "$scope": "Текущая область видимости компонента."
+        , "select": "Публикация метода <code>select()</code> который будет использован видом для переключения между вкладками."
+        , "addPane": "Зачастую компонентам необходимо взаимодействовать друг с другом как одно целое. В нашем случае <code>&lt;pane&gt;</code> будет использовать метод <code>addPane()</code> чтобы зарегистрировать себя в его <code>&lt;tabs&gt;</code> контейнере."
+        , "template": "<code>template</code> это HTML который необходимо отобразить в браузере вместо места для вставки <code>&lt;tabs&gt;</code>. Обратите внимание, что HTML в этом шаблоне может содержать в себе другие директивы."
+        , "restrict": "<code>restrict</code> определяет HTML-формат компонента. В этом случае <code>&lt;tabs&gt;</code> должен быть HTML-элемент."
+        , "ng-transclude": "Помечает место, куда будет помещено содержимое элемента <code>&lt;tabs&gt;</code>."
+        , "transclude": "Указывает, что когда AngularJS заменяет элемент <code>&lt;tabs&gt;</code> с расширенным HTML, то необходимо поместить оригинальное содержимое в место, определенное директивой <code>ng-transclude</code> (см. ниже)."
+        , "scope": "Наш компонент должен иметь приватную область видимости так, чтобы параметры его вида не были бы случайно изменены за пределами <code>&lt;tabs&gt;</code>. Если не нужно показывать атрибуты, можно объявить атрибуты ввода/вывода. См. для примера компонент <code>&lt;pane&gt;</code> ниже."
+        , "replace": "Говорит, AngularJS, что оригинальный элемент <code>&lt;tabs&gt;</code> необходимо заменить на <code>template</code>, а не добавить к нему."
+        , "active": "Устанавливаем CSS-класс <code>active</code>, чтобы показать активную в данный момент вкладку"
+        , "require": "Указывает, что компонент <code>&lt;pane&gt;</code> должен быть внутри компонента <code>&lt;tabs&gt;</code>. Это дает компоненту <code>&lt;pane&gt;</code> доступ к методам контроллера <code>&lt;tabs&gt;</code> — в нашем случае — методу <code>addPane()</code>."
+        , "tabsCtrl": "Как мы уже определили, что <code>require</code> требует <code>&lt;tabs&gt;</code> как наш контейнер, мы получаем свой экземпляр контроллера."
+        , "ng-click": "Выделение открытой вкладки."
+        , "bind": "Указывает, каким является атрибут <code>title</code> в интерпретированном элементе <code>&lt;pane&gt;</code>. Стратегия <code>bind</code> копирует интерполированное значение в область видимости <code>&lt;pane&gt;</code>. Это делает <code>title</code> доступным для связывания с <code>template</code>."
+        }
+      , "beers.js":
+        { "$locale": "Сервис <code>$locale</code> содержит мета-данные для текщей локали. Для каждой комбинации языковых стандартов доступны AngularJS-модули локали."
+        , "beers": "Настрока массива склонений. Мы будем последовательно проходить по этому массиву и увидим какие склонения 'водки' отображается для каждого количества."
+        , "id": "Создание различных правил склонения по числам для локали. В реальном приложении можно было бы загрузить другой модуль, который будет содержать перевод, а так же локализацию правил для каждого языка."
+        , "beerForms": "Склонение по числам для английского."
+        }
+      }
+    </script>
+  </div>
+
+  <!-- The Download Modal that is to be shown when the user clicks on Download in the main AngularJS.org page -->
+  <div class="modal fade downloadModal" id="downloadModal" ng-class="{in: lightbox()}">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="lightbox(false)">×</button>
+      <h2 id="downloadLabel">Скачать AngularJS</h2>
+    </div>
+    <div class="modal-body">
+
+      <dl class="dl-horizontal">
+        <dt>Branch</dt>
+        <dd>
+          <span>
+            <span class="btn-group" data-toggle="buttons-radio">
+              <button id="bluePill" type="button" ng-class="getPillClass('stable', currentBranch)" class="btn bluePill" ng-click="selectType('stable')">Stable</button>
+              <button id="redPill" type="button" ng-class="getPillClass('unstable', currentBranch)" class="btn redPill"  ng-click="selectType('unstable')">Unstable</button>
+              <a id="extraInfoBranch" href="" rel="popover" data-original-title="Branches" data-content="<dl class='dl-horizontal'><dt>Stable</dt><dd>The Release has been well tested, and the API for this version will not undergo any further change.</dd><dt>Unstable</dt><dd>This version is still being worked on, and API's are subject to change without any prior notice. Use only if you want to remain on the most cutting edge...</dd></dl>"><i class="icon-question-sign"></i></a>
+            </span>
+
+          </span>
+
+        </dd>
+        <dt>Build</dt>
+        <dd>
+          <span>
+            <span class="btn-group" data-toggle="buttons-radio">
+              <button type="button" class="btn" ng-class="getPillClass('minified', currentBuild)" ng-click="selectBuild('minified')" ng-class="get">Minified</button>
+              <button type="button" class="btn" ng-class="getPillClass('uncompressed', currentBuild)" ng-click="selectBuild('uncompressed')">Uncompressed</button>
+              <button type="button" class="btn" ng-class="getPillClass('zipped', currentBuild)" ng-click="selectBuild('zipped')">Zip</button>
+              <a id="extraInfoBuild" href="" rel="popover" data-original-title="Branches" data-content="<dl class='dl-horizontal'><dt>Minified</dt><dd>Minified and obfuscated version of the AngularJS base code. Use this in your deployed application (but only if you can't use Google's CDN)</dd><dt>Uncompressed</dt><dd>The main AngularJS source code, as is. Useful for debugging and development purpose, but should ideally not be used in your deployed application</dd><dt>Zipped</dt><dd>The zipped version of the Angular Build, which contains both the builds of AngularJS, as well as documentation and other extras</dd></dl>"><i class="icon-question-sign"></i></a>
+            </span>
+
+          </span>
+        </dd>
+
+        <dt>CDN</dt>
+        <dd>
+          <span class="input-append">
+            <input class="input-xxlarge" type="text" readonly="readonly" ng-model="cdnURL">
+            <a id="extraInfoCDN" href="" rel="popover" data-original-title="Why Google CDN?" data-content="While downloading and using the AngularJS source code is great for development, we recommend that you source the script from Google's CDN (Content Delivery Network) in your deployed, customer facing app whenever possible. You get the following advantages for doing so: <ul><li><strong>Better Caching :</strong> If you host AngularJS yourself, your users will have to download the source code atleast once. But if the browser sees that you are referring to Google CDN's version of AngularJS, and your user has visited another app which uses AngularJS, then he can avail the benefits of caching, and thus reduce one download, speeding up his overall experience!</li><li><strong>Decreased Latency :</strong> Google's CDN distributes your static content across the globe, in various diverse, physical locations. It increases the odds that the user gets a version of AngularJS served from a location near him, thus reducing overall latency.</li><li><strong>Increased Parallelism : </strong>Using Google's CDN reduces one request to your domain. Depending on the browser, the number of parallel requests it can make to a domain is restricted (as low as 2 in IE 7). So it can make a gigantic difference in loading times for users of those browsers.</li></ul>"><i class="icon-question-sign"></i></a>
+          </span>
+        </dd>
+
+        <dt>Bower</dt>
+        <dd>
+          <span class="input-append">
+            <input class="input-xxlarge" type="text" readonly="readonly" value="bower install angular">
+            <a id="extraInfoBower" href="" rel="popover" data-original-title="What is Bower?" data-content="Bower is a package manager for client-side JavaScript components.<br><br>For more info please see: http://twitter.github.com/bower/"><i class="icon-question-sign"></i></a>
+          </span>
+        </dd>
+      </dl>
+
+    </div>
+    <div class="modal-footer">
+      <a ng-href="http://code.angularjs.org/{{getVersion(currentBranch)}}">Дополнительно</a>
+      <a href="http://code.angularjs.org/">Предыдущие версии</a>
+
+      <a class="btn btn-primary btn-large" style="float: right; font-size: 20px; padding-left: 20px;" ng-href="{{downloadLink()}}" download><i class="icon-download-alt icon-large"></i> Скачать</a>
+    </div>
+  </div>
+  <div id="downloadModalBackdrop" class="modal-backdrop fade" ng-class="{in: lightbox()}" ng-click='lightbox(false)'></div>
+</body>
+</html>

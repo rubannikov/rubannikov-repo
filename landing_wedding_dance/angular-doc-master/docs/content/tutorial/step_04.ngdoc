@@ -1,0 +1,214 @@
+@ngdoc overview
+@name Tutorial: 4 - Cвязывание данных
+@description
+
+<ul doc-tutorial-nav="4"></ul>
+
+В этом шаге мы с вами добавим еще одну возможность в наше приложение. Пользователи нашего приложения смогут 
+управлять сортировкой списка телефонов. Динамическая сортировка будет реализована через создание нового свойства 
+модели, которое будет связано с повторителем (repeater). А дальше позволим магии связывания данных (data binding)
+сделать остальную часть работы за нас.
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 4.</p>
+        <pre>git checkout -f step-4</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-4/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 4.</p>
+        <pre>git checkout -f step-4</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-4/app">сервере Angular</a>
+        </p>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+Вы должны увидеть, что в дополнение к окну поиска в приложении появилось выпадающее меню, которое позволяет
+пользователям управлять сортировкой телефонов.
+
+Наиболее важные изменения между шагами 3 и 4 приведены ниже. Вы можете увидеть полный список изменений 
+перейдя по ссылке {@link https://github.com/angular/angular-phonecat/compare/step-3...step-4 GitHub}:
+
+
+## Шаблон
+
+__`app/index.html`:__
+<pre>
+  Search: <input ng-model="query">
+  Sort by:
+  <select ng-model="orderProp">
+    <option value="name">Alphabetical</option>
+    <option value="age">Newest</option>
+  </select>
+
+
+  <ul class="phones">
+    <li ng-repeat="phone in phones | filter:query | orderBy:orderProp">
+      {{phone.name}}
+      <p>{{phone.snippet}}</p>
+    </li>
+  </ul>
+</pre>
+
+Мы сделали следующие изменения в шаблоне `index.html`:
+
+* Во-первых, мы добавили HTML элемент `<select>`, связанный с моделью `orderProp`, теперь наши пользователи могут 
+  выбрать одно из двух условий сортировки.
+
+      <img  class="diagram" src="img/tutorial/tutorial_04.png">
+
+* Также мы связали фильтр `filter` с фильтром {@link api/ng.filter:orderBy `orderBy`} для дальнейшей обработки 
+  входных данных для повторителя (repeater). `orderBy` это фильтр, который принимает входной массив, 
+  копирует его и сортирует элементы по условию, а потом возвращает отсортированный массив.
+
+Angular создает двустороннее связывания данных (data-binding) между элементом `<select>` и моделью `orderProp`.
+`orderProp` затем используется в качестве условия для сортировки в фильтре `orderProp`.
+
+Как мы уже говорили в разделе о связывании данных и повторителе в шаге 3, всякий раз, когда модель
+изменяется (например, потому что пользователь изменяет порядок сортировки с помощью выпадающего меню 
+для элемента `<select>`), Angular-овское связывание данных автоматически будет обновлять вид (view).
+Нет раздутого кода для манипуляции c DOM-моделью!
+
+
+## Контроллер
+
+__`app/js/controllers.js`:__
+<pre>
+function PhoneListCtrl($scope) {
+  $scope.phones = [
+    {"name": "Nexus S",
+     "snippet": "Fast just got faster with Nexus S.",
+     "age": 0},
+    {"name": "Motorola XOOM™ with Wi-Fi",
+     "snippet": "The Next, Next Generation tablet.",
+     "age": 1},
+    {"name": "MOTOROLA XOOM™",
+     "snippet": "The Next, Next Generation tablet.",
+     "age": 2}
+  ];
+
+  $scope.orderProp = 'age';
+}
+</pre>
+
+* Мы модифицировали модель `phones` - массив телефонов - добавив свойство `age` для каждой записи телефона. 
+  Это свойство используется для сортировки телефонов по возрасту.
+
+* Мы добавили новую строчку кода в контроллере, которая устанавливает значение по умолчанию для `orderProp` 
+  в `age`. Если бы мы не установили значение по умолчанию здесь, то модель оставалась бы неинициализированной,
+  пока пользователь не выбрал бы один из вариантов в выпадающем меню.
+
+Настало время, чтобы поговорить о двустороннем связывании данных (two-way data-binding). Обратите внимание, что когда 
+приложение загружается в браузер, опция "Newest" выбрана в выпадающем меню. Это происходит потому что мы 
+устанавливаем в контроллере `orderProp` в значение `'age'`. Таким образом, связывание работает в направлении от 
+нашей модели в пользовательский интерфейс. Теперь, если вы выберите в выпадающем меню опцию "Alphabetically", 
+модель будет обновляться и список телефонов будет пересортирован. То есть связывание данных делает свою работу 
+в обратном направлении - от пользовательского интерфейса в модель.
+
+
+## Тестирование
+
+Изменения которые мы сделали должны быть проверены как модульным тестом (unit test),
+так и системным тестом (end-to-end test). Давайте для начала посмотрим на модульный тест.
+
+__`test/unit/controllersSpec.js`:__
+<pre>
+describe('PhoneCat controllers', function() {
+
+  describe('PhoneListCtrl', function(){
+    var scope, ctrl;
+
+    beforeEach(function() {
+      scope = {},
+      ctrl = new PhoneListCtrl(scope);
+    });
+
+
+    it('should create "phones" model with 3 phones', function() {
+      expect(scope.phones.length).toBe(3);
+    });
+
+
+    it('should set the default value of orderProp model', function() {
+      expect(scope.orderProp).toBe('age');
+    });
+  });
+});
+</pre>
+
+Данный модульный тест проверяет, что значение свойства для сортировки установлено по умолчанию.
+
+Мы использовали API Jasmine-а, чтобы извлечь коструктор для контроллера в блоке `beforeEach`, который
+является общим для всех тестов в родительском блоке `describe`.
+
+После запуска вы должны увидеть следующий вывод во вкладке Karma:
+
+        Chrome 22.0: Executed 2 of 2 SUCCESS (0.021 secs / 0.001 secs)
+
+
+Давайте теперь посмотрим на системный тест.
+
+__`test/e2e/scenarios.js`:__
+<pre>
+...
+    it('should be possible to control phone order via the drop down select box',
+        function() {
+      //let's narrow the dataset to make the test assertions shorter
+      input('query').enter('tablet');
+
+      expect(repeater('.phones li', 'Phone List').column('phone.name')).
+          toEqual(["Motorola XOOM\u2122 with Wi-Fi",
+                   "MOTOROLA XOOM\u2122"]);
+
+      select('orderProp').option('Alphabetical');
+
+      expect(repeater('.phones li', 'Phone List').column('phone.name')).
+          toEqual(["MOTOROLA XOOM\u2122",
+                   "Motorola XOOM\u2122 with Wi-Fi"]);
+    });
+...
+</pre>
+
+Системный тест проверяет, что механизм сортировки выпадающего меню элемента `<select>` работает правильно.
+
+Теперь вы можете перезапустить скрипт `./scripts/e2e-test.sh`, либо обновить вкладку браузера с системным тестом
+`runner.html`, чтобы убедиться что тесты пройдены. Либо вы можете посмотреть их на {@link
+http://angular.github.com/angular-phonecat/step-4/test/e2e/runner.html
+нашем сервере Angular-а}.
+
+
+# Давайте поэкспериментируем
+
+* В контроллере `PhoneListCtrl` попробуйте удалить оператор, который устанавливает значение для `orderProp`, и
+  вы увидите, что Angular будет временно добавлять новую опцию "unknown" в выпадающем меню и сортировка 
+  по умолчанию будет в неупорядоченном/естественном порядке.
+
+* Давайте добавим связывание `{{orderProp}}` в шаблоне `index.html` для отображения текущего значения 
+  типа сортировки в виде текста.
+
+
+# Идем дальше
+
+Теперь, когда мы добавили список типов сортировки и протестировали приложение, мы можем идти дальше на {@link step_05 
+Шаг 5}, чтобы узнать о сервисах Angular-а и как использовать внедрение зависимости в Angular-е.
+
+
+<ul doc-tutorial-nav="4"></ul>

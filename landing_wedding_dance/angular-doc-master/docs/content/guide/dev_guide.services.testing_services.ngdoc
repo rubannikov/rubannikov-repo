@@ -1,0 +1,62 @@
+@ngdoc overview
+@name Developer Guide: Angular Services: Тестирование сервисов
+@description
+
+Ниже приведен модульный тест для сервиса «notify» в примере «Зависимостей» в разделе {@link
+dev_guide.services.creating_services Создание сервисов}. Пример модульного теста использует Jasmine
+spy (макет) вместо реальных браузерных сообщений (alert).
+
+<pre>
+var mock, notify;
+
+beforeEach(function() {
+  mock = {alert: jasmine.createSpy()};
+
+  module(function($provide) {
+    $provide.value('$window', mock);
+  });
+
+  inject(function($injector) {
+    notify = $injector.get('notify');
+  });
+});
+
+it('should not alert first two notifications', function() {
+  notify('one');
+  notify('two');
+
+  expect(mock.alert).not.toHaveBeenCalled();
+});
+
+it('should alert all after third notification', function() {
+  notify('one');
+  notify('two');
+  notify('three');
+
+  expect(mock.alert).toHaveBeenCalledWith("one\ntwo\nthree");
+});
+
+it('should clear messages after alert', function() {
+  notify('one');
+  notify('two');
+  notify('third');
+  notify('more');
+  notify('two');
+  notify('third');
+
+  expect(mock.alert.callCount).toEqual(2);
+  expect(mock.alert.mostRecentCall.args).toEqual(["more\ntwo\nthird"]);
+});
+</pre>
+
+
+## Связанные разделы
+
+* {@link dev_guide.services.understanding_services Понимание сервисов}
+* {@link dev_guide.services.creating_services Создание сервисов}
+* {@link dev_guide.services.managing_dependencies Управление зависимостями сервисов}
+* {@link dev_guide.services.injecting_controllers Внедрение сервисов в контроллеры}
+
+## Связанное API
+
+* {@link api/ng API сервисов}

@@ -1,0 +1,112 @@
+@ngdoc overview
+@name Cookbook: Форма
+@description
+
+Основная цель веб-приложения — отображение и сбор данных. Поэтому Angular стремится сделать
+обе эти операции тривиальными. Пример демонстрирует, как можно построить простую форму, позволяющую 
+пользователю вводить данные.
+
+
+<doc:example>
+ <doc:source>
+  <script>
+    function FormController($scope) {
+      var user = $scope.user = {
+        name: 'John Smith',
+        address:{line1: '123 Main St.', city:'Anytown', state:'AA', zip:'12345'},
+        contacts:[{type:'phone', value:'1(234) 555-1212'}]
+      };
+      $scope.state = /^\w\w$/;
+      $scope.zip = /^\d\d\d\d\d$/;
+
+      $scope.addContact = function() {
+         user.contacts.push({type:'email', value:''});
+      };
+
+      $scope.removeContact = function(contact) {
+        for (var i = 0, ii = user.contacts.length; i < ii; i++) {
+          if (contact === user.contacts[i]) {
+            $scope.user.contacts.splice(i, 1);
+          }
+        }
+      };
+    }
+  </script>
+  <div ng-controller="FormController" class="example">
+
+    <label>Имя:</label><br>
+    <input type="text" ng-model="user.name" required/> <br><br>
+
+    <label>Адрес:</label><br>
+    <input type="text" ng-model="user.address.line1" size="33" required> <br>
+    <input type="text" ng-model="user.address.city" size="12" required>,
+    <input type="text" ng-model="user.address.state"
+           ng-pattern="state" size="2" required>
+    <input type="text" ng-model="user.address.zip" size="5"
+           ng-pattern="zip" required><br><br>
+
+    <label>Телефон:</label>
+    [ <a href="" ng-click="addContact()">добавить</a> ]
+    <div ng-repeat="contact in user.contacts">
+      <select ng-model="contact.type">
+        <option>эл. почта</option>
+        <option>телефон</option>
+        <option>пейджер</option>
+        <option>IM</option>
+      </select>
+      <input type="text" ng-model="contact.value" required>
+       [ <a href="" ng-click="removeContact(contact)">×</a> ]
+    </div>
+    <hr/>
+    Отладчик:
+    <pre>user={{user | json}}</pre>
+  </div>
+
+ </doc:source>
+ <doc:scenario>
+  it('should show debug', function() {
+    expect(binding('user')).toMatch(/John Smith/);
+  });
+  it('should add contact', function() {
+    using('.example').element('a:contains(добавить)').click();
+    using('.example div:last').input('contact.value').enter('you@example.org');
+    expect(binding('user')).toMatch(/\(234\) 555\-1212/);
+    expect(binding('user')).toMatch(/you@example.org/);
+  });
+
+  it('should remove contact', function() {
+    using('.example').element('a:contains(×)').click();
+    expect(binding('user')).not().toMatch(/\(234\) 555\-1212/);
+  });
+
+  it('should validate zip', function() {
+    expect(using('.example').
+      element(':input[ng\\:model="user.address.zip"]').
+      prop('className')).not().toMatch(/ng-invalid/);
+    using('.example').input('user.address.zip').enter('abc');
+    expect(using('.example').
+      element(':input[ng\\:model="user.address.zip"]').
+      prop('className')).toMatch(/ng-invalid/);
+  });
+
+  it('should validate state', function() {
+    expect(using('.example').element(':input[ng\\:model="user.address.state"]').prop('className'))
+      .not().toMatch(/ng-invalid/);
+    using('.example').input('user.address.state').enter('XXX');
+    expect(using('.example').element(':input[ng\\:model="user.address.state"]').prop('className'))
+      .toMatch(/ng-invalid/);
+  });
+ </doc:scenario>
+</doc:example>
+
+
+# На что следует обратить внимание
+
+* Модель пользовательских данных инициализируется {@link api/ng.directive:ngController контроллером} и
+  доступна в{@link api/ng.$rootScope.Scope области видимости} с начальными данными.
+* В целях отладки мы включили отладчик вида модели, чтобы лучше понимать, что происходит.
+* {@link api/ng.directive:input Директивы поля ввода} просто ссылаются на модель и привязываются к данным.
+* Проверка входящих данных. (Попробуйте оставить их пустными или ввести в поле zip не цифры)
+* В приложение можно просто читать и записывать в модель и форма будет обновлена.
+* При нажатии на ссылку «добавить» в массив `user.contacts` добавляются новые элементы, которые затем 
+  отображаются в виде.

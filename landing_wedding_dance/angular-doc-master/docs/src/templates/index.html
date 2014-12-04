@@ -1,0 +1,347 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js ng-app: docsApp;" lang="en" ng-controller="DocsController"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="Description"
+        content="AngularJS это то, чем был бы HTML, если бы он проектировался для веб-приложений.
+           Декларативные шаблоны с data-binding, MVW, MVVM, MVC, dependency injection и превосходная
+           тестируемость всех иннструментов в чистом клиентском JavaScript! Теперь на русском языке!">
+  <meta name="fragment" content="!">
+  <title ng-bind-template="AngularJS: {{partialTitle}}">AngularJS по-русски</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script type="text/javascript">
+    // dynamically add base tag as well as css and javascript files.
+    // we can't add css/js the usual way, because some browsers (FF) eagerly prefetch resources
+    // before the base attribute is added, causing 404 and terribly slow loading of the docs app.
+    (function() {
+      var indexFile = (location.pathname.match(/\/(index[^\.]*\.html)/) || ['', 'index.html'])[1],
+          rUrl = /(#!\/|api|guide|misc|tutorial|cookbook|ui|index[^\.]*\.html).*$/,
+          baseUrl = location.href.replace(rUrl, indexFile),
+          jQuery = /index-jq[^\.]*\.html$/.test(baseUrl),
+          debug = /index[^\.]*-debug\.html$/.test(baseUrl),
+          production = location.hostname === 'angular.ru' || /production=true/.test(location.search),
+          headEl = document.getElementsByTagName('head')[0],
+          sync = true,
+          angularVersion = {
+            current: '"NG_VERSION_FULL"', // rewrite during build
+            stable: '"NG_VERSION_STABLE"'
+          };
+
+      addTag('base', {href: baseUrl});
+      addTag('link', {rel: 'stylesheet', href: 'css/bootstrap.min.css', type: 'text/css'});
+      addTag('link', {rel: 'stylesheet', href: 'css/font-awesome.css', type: 'text/css'});
+      addTag('link', {rel: 'stylesheet', href: 'css/docs.css', type: 'text/css'});
+      addTag('link', {rel: 'stylesheet', href: 'css/animations.css', type: 'text/css'});
+      if (jQuery) addTag('script', {src: debug ? 'js/jquery.js' : 'js/jquery.min.js'});
+      addTag('script', {src: path('angular.js')}, sync);
+      addTag('script', {src: path('angular-resource.js') }, sync);
+      addTag('script', {src: path('angular-cookies.js') }, sync);
+      addTag('script', {src: path('angular-sanitize.js') }, sync);
+      addTag('script', {src: path('angular-mobile.js') }, sync);
+      addTag('script', {src: path('angular-bootstrap.js') }, sync);
+      addTag('script', {src: path('angular-bootstrap-prettify.js') }, sync);
+      addTag('script', {src: 'js/docs.js'}, sync);
+      addTag('script', {src: 'docs-keywords.js'}, sync);
+
+      function path(name) {
+        if (production) {
+          if (name.match(/^angular(-\w+)?\.js/) && !name.match(/bootstrap/)) {
+            name =  '//ajax.googleapis.com/ajax/libs/angularjs/' +
+                angularVersion.stable +
+                '/' +
+                name.replace(/\.js$/, '.min.js');
+          } else {
+            name =  'http://code.angularjs.org/' +
+                angularVersion.stable +
+                '/' +
+                name.replace(/\.js$/, '.min.js');
+          }
+          return name;
+        }
+        return '../' + name.replace(/\.js$/, debug ? '.js' : '.min.js');
+      }
+
+      function addTag(name, attributes, sync) {
+        var el = document.createElement(name),
+            attrName;
+
+        for (attrName in attributes) {
+          el.setAttribute(attrName, attributes[attrName]);
+        }
+
+        sync ? document.write(outerHTML(el)) : headEl.appendChild(el);
+      }
+
+      function outerHTML(node){
+        // if IE, Chrome take the internal method otherwise build one
+        return node.outerHTML || (
+            function(n){
+                var div = document.createElement('div'), h;
+                div.appendChild(n);
+                h = div.innerHTML;
+                div = null;
+                return h;
+            })(node);
+      }
+    })();
+
+
+    // force page reload when new update is available
+    window.applicationCache && window.applicationCache.addEventListener('updateready', function(e) {
+      if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+        window.applicationCache.swapCache();
+        window.location.reload();
+      }
+    }, false);
+
+
+    // GA asynchronous tracker
+    var _gaq = _gaq || [];
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-40383812-1', 'cloudbees.net');
+    ga('send', 'pageview');
+  </script>
+</head>
+
+<body>
+  <header class="header">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="//angular.ru/" style="padding-top: 3px; padding-bottom: 0px;">
+            <img class="AngularJS-small" src="/img/AngularJS-small.png" style="width: auto; height: auto;">
+          </a>
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            <li><a href="/"><i class="icon-home icon-white"></i> Главная</a></li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-eye-open icon-white"></i> Обучение <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="misc/started">С чего начать</a></li>
+                <li><a href="http://www.youtube.com/user/angularjs">Видео</a></li>
+                <li><a href="tutorial">Учебник</a></li>
+                <li><a href="http://builtwith.angularjs.org/">Примеры использования</a></li>
+                <li><a href="https://github.com/angular/angular-seed">Шаблонное приложение</a></li>
+                <li><a href="misc/faq">FAQ</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown active">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-book icon-white"></i> Разработка <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/tutorial">Учебник</a></li>
+                <li><a href="/guide/">Руководство разработчика</a></li>
+                <li><a href="/api/">Справочник API</a></li>
+                <li><a href="/ui/">UI-Router</a></li>
+                <li><a href="/cookbook/">Рецепты</a></li>
+                <li><a href="/misc/contribute">Сотрудничество</a></li>
+                <li><a href="http://code.angularjs.org/">Скачать</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-comment icon-white"></i> Обсуждение <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="http://javascript.ru/forum/angular/">Русскоязычный форум</a></li>
+                <li><a href="http://blog.angularjs.org/">Блог</a></li>
+                <li><a href="http://groups.google.com/group/angular">Список рассылки</a></li>
+                <li><a href="http://webchat.freenode.net/?channels=angularjs&uio=d4">Chat Room</a></li>
+                <li class="divider"></li>
+                <li><a href="https://twitter.com/#!/angularjs">Twitter</a></li>
+                <li><a href="https://plus.google.com/110323587230527980117">Google+</a></li>
+                <li class="divider"></li>
+                <li><a href="https://github.com/angular/angular.js">GitHub</a></li>
+                <li><a href="https://github.com/angular/angular.js/issues">Issue Tracker</a></li>
+                <li class="divider"></li>
+                <li><a href="/misc/translate">Перевод на русский</a></li>
+              </ul>
+            </li>
+            <li class="divider-vertical"></li>
+          </ul>
+          <form class="navbar-search pull-right" method="GET" action="https://www.google.com/search">
+            <input type="text" name="as_q" class="search-query" placeholder="Поиск">
+            <input type="hidden" name="as_sitesearch" value="angular.ru">
+          </form>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div role="main" class="container">
+    <div class="row clear-navbar"></div>
+
+    <div class="row">
+      <div class="span12">
+        <!--[if lt IE 7]>
+        <p class="alert alert-error">Your browser is <em>ancient!</em>
+          <a href="http://browsehappy.com/">Upgrade to a different browser</a> or
+          <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to
+          experience this site.
+        </p>
+        <![endif]-->
+
+        <!--[if lt IE 9]>
+        <div class="alert">
+          You are using an old version of Internet Explorer.
+          For better and safer browsing experience please <a href="http://www.microsoft.com/IE9">upgrade IE</a>
+          or install <a href="http://google.com/chrome">Google Chrome browser</a>.
+        </div>
+        <![endif]-->
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="span3">
+        <form class="well form-search" ng-submit="submitForm()">
+          <div class="dropdown search"
+               ng-class="{open: focused && bestMatch.rank > 0 && bestMatch.page != currentPage}">
+            <input type="text" ng-model="search" placeholder="search the docs"
+                   tabindex="1" accesskey="s" class="input-medium search-query" focused="focused">
+            <ul class="dropdown-menu">
+              <li>
+                <a href="{{bestMatch.page.url}}">{{bestMatch.page.shortName}}</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="spacer"></div>
+          <div ng-show="search">Результаты поиска:</div>
+
+          <ul class="nav nav-list" ng-hide="page">
+            <li ng-repeat="page in pages track by page.url" ng-class="navClass(page)" class="api-list-item">
+              <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
+            </li>
+          </ul>
+
+
+          <ul class="nav nav-list well" ng-repeat="module in modules track by module.url" class="api-list-item">
+            <li class="nav-header module">
+              <a class="guide" href="{{URL.module}}">модуль</a>
+              <a class="code" href="{{module.url}}">{{module.name}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.directives">
+              <a href="{{URL.directive}}" class="guide">директивы</a>
+            </li>
+            <li ng-repeat="page in module.directives track by page.url" ng-class="navClass(page)" ng-animate="'expand'" class="api-list-item">
+              <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.filters">
+              <a href="{{URL.filter}}" class="guide">фильтры</a>
+            </li>
+            <li ng-repeat="page in module.filters track by page.url" ng-class="navClass(page)" ng-animate="'expand'" class="api-list-item">
+              <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.services">
+              <a href="{{URL.service}}" class="guide">сервисы</a>
+            </li>
+            <li ng-repeat="service in module.services track by service.instance.url" ng-animate="'expand'" ng-class="navClass(service.instance, service.provider)" class="api-list-item">
+              <a ng-show="service.provider" class="pull-right" href="{{service.provider.url}}" tabindex="2"><i class="icon-cog"></i></a>
+              <a href="{{service.instance.url}}" tabindex="2">{{service.name}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.types">
+              <a href="{{URL.type}}" class="guide">типы</a>
+            </li>
+            <li ng-repeat="page in module.types track by page.url" ng-class="navClass(page)" ng-animate="'expand'" class="api-list-item">
+              <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.globals">
+              <a href="{{URL.api}}" class="global guide">основное API</a>
+              &nbsp;
+            </li>
+            <li ng-repeat="page in module.globals track by page.url" ng-class="navClass(page)" class="api-list-item">
+              <a href="{{page.url}}" tabindex="2">{{page.id}}</a>
+            </li>
+
+          </ul>
+
+        </form>
+      </div>
+      <div class="span9">
+
+        <ul class="breadcrumb">
+          <li ng-repeat="crumb in breadcrumb">
+            <span ng-hide="crumb.url">{{crumb.name}}</span>
+            <a ng-show="crumb.url" href="{{crumb.url}}">{{crumb.name}}</a>
+            <span ng-show="crumb.url" class="divider">/</span>
+          </li>
+        </ul>
+
+        <div id="loading" ng-show="loading">Загрузка...</div>
+
+        <div ng-hide="loading" ng-include src="currentPage.partialUrl" onload="afterPartialLoaded()" autoscroll class="content" ng-animate="{enter: 'slide-reveal'}" ></div>
+
+        <div id="disqus" class="disqus">
+          <h2>Обсуждение</h2>
+          <div id="disqus_thread" class="content-panel-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div id="fader" ng-show="subpage" style="display: none"></div>
+  <div id="subpage" ng-show="subpage" style="display: none">
+    <div>
+      <h2>Хотите работать автономно с документацией AngularJS?</h2>
+      <a ng-click="subpage=false">&#10005;</a>
+      <p>
+        Чтобы воспользоваться документацией AngularJS в автономном режиме, щелкните
+        кнопку ниже. Произойдет обновление текущей страницы и в фоне подгрузятся все необходимые
+        файлы (примерно 3,5 МБ). В следующий раз при загрузке документов браузер возьмет эти файлы из кэша.
+        <br><br>
+        Эта особенность поддерживается всеми современными браузерами, за исключением IE9 которой не поддерживает
+        кэш приложений.
+      </p>
+      <button id="cacheButton" ng-click="enableOffline()">Дайте всё!</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="pull-right"><a href="#">Наверх</a></p>
+
+      <p>
+        Супер-разработка Google, супер-перевод на русский язык tamtakoe, maksimr, vsorlov, altbog, alvas, madhead, DWand, Chiuaua, davetoxa, nikolaifedorov и др. ©2010-2013
+        ( <a id="version"
+             ng-href="https://github.com/angular/angular.js/blob/master/CHANGELOG.md#{{versionNumber}}"
+             ng-bind-template="v{{version}}">
+          </a>
+          <!-- TODO(i): enable
+          <a ng-hide="offlineEnabled" ng-click ="subpage = true">(enable offline support)</a>
+          <span ng-show="offlineEnabled">(offline support enabled)</span>
+          -->
+        )
+      </p>
+      <p>
+        Лицензия на исходный код
+        <a href="https://github.com/angular/angular.js/blob/master/LICENSE" target="_blank">The
+          MIT License</a>. Лицензия на документацию <a
+            href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>

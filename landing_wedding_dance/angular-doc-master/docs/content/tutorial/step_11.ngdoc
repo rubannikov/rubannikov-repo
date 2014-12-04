@@ -1,0 +1,250 @@
+@ngdoc overview
+@name Tutorial: 11 - REST и данные
+@description
+
+<ul doc-tutorial-nav="11"></ul>
+
+
+В этом уроке вы узнаете о том как улучшить способы получения данных в приложении.
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 11.</p>
+        <pre>git checkout -f step-11</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-11/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 11.</p>
+        <pre>git checkout -f step-11</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-11/app">сервере Angular</a>
+        </p>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+
+Последним улучшением нашего приложения станет написание сервиса, который будет выступать в роли
+{@link http://ru.wikipedia.org/wiki/REST REST-клиента}. Его использование упростит работу с
+с XHR-запросами. Больше не нужно будет использовать низкоуровневые {@link api/ng.$http $http} API, разбираться
+с HTTP-методами и URL.
+
+Ключевые изменения приведены ниже, полный дифф вы можете просмотреть на {@link
+https://github.com/angular/angular-phonecat/compare/step-10...step-11 GitHub}:
+
+
+## Шаблон
+
+Сервис объявлен в `app/js/services.js`, поэтому надо подключить этот скрипт к нашему шаблону.
+Также, для корректной работы сервиса нужен файл `angular-resource.js`, который содержит модуль
+`ngResource`, содержащий, в свою очередь, сервис `$resource`:
+
+__`app/index.html`.__
+<pre>
+...
+  <script src="js/services.js"></script>
+  <script src="lib/angular/angular-resource.js"></script>
+...
+</pre>
+
+## Сервис
+
+__`app/js/services.js`.__
+<pre>
+angular.module('phonecatServices', ['ngResource']).
+    factory('Phone', function($resource){
+  return $resource('phones/:phoneId.json', {}, {
+    query: {method:'GET', params:{phoneId:'phones'}, isArray:true}
+  });
+});
+</pre>
+
+Мы использовали API модулей Angular, чтобы зарегистрировать сервис с помощью функции-фабрики.
+Ей передаётся имя сервиса - 'Phone' и ещё одна порождающая функция. Эта функция похожа на конструктор
+контроллера - её зависимости также перечисляются в списке аргументов. В данном случае, наш сервис
+зависит от сервиса `$resource`.
+
+Сервис {@link api/ngResource.$resource `$resource`} упрощает создание {@link http://ru.wikipedia.org/wiki/REST
+REST-клиентов}, сводя его к написанию лишь пары строк кода. В последствии, такие клиенты могут использоваться в
+приложении вместо низкоуровневого {@link api/ng.$http сервиса $http}.
+
+
+__`app/js/app.js`.__
+<pre>
+...
+angular.module('phonecat', ['phonecatFilters', 'phonecatServices']).
+...
+</pre>
+
+Добавим 'phonecatServices' к списку зависимостей 'phonecat'.
+
+
+## Контроллер
+
+Мы упростили наши контроллеры `PhoneListCtrl` и `PhoneDetailCtrl`, заместив низкоуровневый сервис {@link api/ng.$http $http} на
+новый сервис `Phone`. Сервис {@link api/ngResource.$resource `$resource`} более удобен для использования с бэкэндом, написанном
+в соответствии с REST-принципами, нежели `$http`. Код в контроллерах стал прозрачнее для понимания.
+
+__`app/js/controllers.js`.__
+<pre>
+...
+
+function PhoneListCtrl($scope, Phone) {
+  $scope.phones = Phone.query();
+  $scope.orderProp = 'age';
+}
+
+//PhoneListCtrl.$inject = ['$scope', 'Phone'];
+
+
+
+function PhoneDetailCtrl($scope, $routeParams, Phone) {
+  $scope.phone = Phone.get({phoneId: $routeParams.phoneId}, function(phone) {
+    $scope.mainImageUrl = phone.images[0];
+  });
+
+  $scope.setImage = function(imageUrl) {
+    $scope.mainImageUrl = imageUrl;
+  }
+}
+
+//PhoneDetailCtrl.$inject = ['$scope', '$routeParams', 'Phone'];
+</pre>
+
+Обратите внимание, мы заменили
+
+    $http.get('phones/phones.json').success(function(data) {
+      $scope.phones = data;
+    });
+
+на:
+
+    $scope.phones = Phone.query();
+
+Вот так, всего лишь вызовом одного метода мы указываем, что хотим получить список всех телефонов.
+
+Важно отметить, что мы не передаём никаких колбэков, когда используем сервис `Phone`. Всё выглядит так,
+словно результат возвращается синхронно, что на самом деле не так. На самом деле синхронно возвращается
+объект `future`, который примет данные, когда XHR-запрос завершится. Благодаря механизму привязки данных в
+Angular, мы можем просто привязать этот объект к шаблону. Затем, когда поступят реальные данные, шаблон будет
+автоматически перерисован.
+
+Иногда, возможностей `future` и привязки данных не хватает для выполнения всех требуемых действий. В таком случае,
+мы можем добавить колбэк, чтобы тот обработал результат запроса. Контроллер `PhoneDetailCtrl` демонстирирует
+такую возможность, установив  `mainImageUrl` в колбэке.
+
+
+## Тестирование
+
+Мы модифицировали наши юнит-тесты, чтобы убедиться что наш сервис делает HTTP-запросы и обрабатывает их
+как следует. Также в тестах проверяется правильность работы с сервисом в контроллерах.
+
+Сервис {@link api/ngResource.$resource $resource} дополняет объект ответа методами для обновления и
+удаления ресурса. Если бы мы использовали стандартный алгоритм сравнения `toEqual`, наши тесты провалились бы,
+потому что данные не полностью совпадают. Чтобы решить эту проблемы, мы будем использовать новый `toEqualData` {@link
+http://pivotal.github.com/jasmine/jsdoc/symbols/jasmine.Matchers.html сравниватель Jasmine}. Он сравнивает данные лишь по полям,
+игнорируя методы.
+
+
+__`test/unit/controllersSpec.js`:__
+<pre>
+describe('PhoneCat controllers', function() {
+
+  beforeEach(function(){
+    this.addMatchers({
+      toEqualData: function(expected) {
+        return angular.equals(this.actual, expected);
+      }
+    });
+  });
+
+
+  beforeEach(module('phonecatServices'));
+
+
+  describe('PhoneListCtrl', function(){
+    var scope, ctrl, $httpBackend;
+
+    beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
+      $httpBackend = _$httpBackend_;
+      $httpBackend.expectGET('phones/phones.json').
+          respond([{name: 'Nexus S'}, {name: 'Motorola DROID'}]);
+
+      scope = $rootScope.$new();
+      ctrl = $controller(PhoneListCtrl, {$scope: scope});
+    }));
+
+
+    it('should create "phones" model with 2 phones fetched from xhr', function() {
+      expect(scope.phones).toEqual([]);
+      $httpBackend.flush();
+
+      expect(scope.phones).toEqualData(
+          [{name: 'Nexus S'}, {name: 'Motorola DROID'}]);
+    });
+
+
+    it('should set the default value of orderProp model', function() {
+      expect(scope.orderProp).toBe('age');
+    });
+  });
+
+
+  describe('PhoneDetailCtrl', function(){
+    var scope, $httpBackend, ctrl,
+        xyzPhoneData = function() {
+          return {
+            name: 'phone xyz',
+                images: ['image/url1.png', 'image/url2.png']
+          }
+        };
+
+
+    beforeEach(inject(function(_$httpBackend_, $rootScope, $routeParams, $controller) {
+      $httpBackend = _$httpBackend_;
+      $httpBackend.expectGET('phones/xyz.json').respond(xyzPhoneData());
+
+      $routeParams.phoneId = 'xyz';
+      scope = $rootScope.$new();
+      ctrl = $controller(PhoneDetailCtrl, {$scope: scope});
+    }));
+
+
+    it('should fetch phone detail', function() {
+      expect(scope.phone).toEqualData({});
+      $httpBackend.flush();
+
+      expect(scope.phone).toEqualData(xyzPhoneData());
+    });
+  });
+});
+</pre>
+
+Теперь, вы можете видеть следующий вывод в закладке Karma:
+
+    Chrome 22.0: Executed 4 of 4 SUCCESS (0.038 secs / 0.01 secs)
+
+
+# Итоги
+
+Вот и всё! Мы создали веб-приложение за относительно короткий промежуток времени. В {@link
+the_end заключении} мы расскажем вам, куда двигаться дальше.
+
+
+<ul doc-tutorial-nav="11"></ul>

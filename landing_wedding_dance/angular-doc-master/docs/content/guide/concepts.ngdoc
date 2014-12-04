@@ -1,0 +1,406 @@
+@ngdoc overview
+@name Основные понятия
+@description
+
+# Обзор
+
+Этот документ дает представление об основных компонентах Angular и о том, как они работают вместе.
+Вот они:
+
+  * {@link concepts#startup быстрый старт (startup)} - приложение типа Hello world
+  * {@link concepts#runtime среда исполнения (runtime)} - обзор среды исполнения Angular
+  * {@link concepts#scope область видимости (scope)} - связующее звено между представлением и контроллером
+  * {@link concepts#controller контроллер (controller)} - поведение программы
+  * {@link concepts#model модель (model)} - данные программы
+  * {@link concepts#view вид или представление (view)} - то что видит пользователь
+  * {@link concepts#directives директивы (directives)} - расширение HTML-синтаксиса
+  * {@link concepts#filters фильтры (filters)} - форматируют данные в соответствии с региональными установками пользователя
+  * {@link concepts#injector ижектор (injector)} - собирает приложение
+  * {@link concepts#module модуль (module)} - настраивает инжектор
+  * {@link concepts#angular_namespace `$`} - пространство имен Angular
+
+<a name="startup"></a>
+# Быстрый старт
+
+Для начала, сдвинемся с мертвой точки (см. схему и пример ниже):
+
+<img class="pull-right" style="padding-left: 3em;" src="img/guide/concepts-startup.png">
+
+  1. Браузер загружает HTML-документ и строит DOM.
+  2. Браузер загружает скрипт angular.js
+  3. Angular ожидает события `DOMContentLoaded`
+  4. Angular ищет {@link api/ng.directive:ngApp ng-app} {@link guide/directive директиву}, которая определяет область действия фреймворка
+  5. {@link guide/module Модуль}, указанный в директиве {@link api/ng.directive:ngApp ng-app} (если таковой имеется), используется для настройки {@link api/AUTO.$injector $injector}
+  6. {@link api/AUTO.$injector $injector} используется для создания сервиса {@link
+     api/ng.$compile $compile}, а заодно и {@link
+     api/ng.$rootScope $rootScope}
+  7. Сервис {@link api/ng.$compile $compile} используется для компиляции DOM и связки его с {@link api/ng.$rootScope $rootScope}
+  8. {@link guide/directive Директива} {@link api/ng.directive:ngInit ng-init}  присваивает значение `World` свойству `name` в области видимости {@link guide/scope (scope)}
+  9. `{{name}}` {@link api/ng.$interpolate преобразует} выражение в `Hello World!`
+
+<div class="clear">
+</div>
+<example>
+  <file name="index.html">
+    <p ng-init=" name='World' ">Hello {{name}}!</p>
+  </file>
+</example>
+
+
+<a name="runtime"></a>
+# Среда исполнения
+
+<img class="pull-right" style="padding-left: 3em; padding-bottom: 1em;" src="img/guide/concepts-runtime.png">
+
+Диаграмма и пример ниже демонстрируют как Angular взаимодействует с браузерным циклом событий.
+
+  1. Цикл событий ожидает наступления события. Событие - это действие пользователя, срабатывание таймера или
+     событие в сети (ответ от сервера).
+  2. В контексте JavaScript выполняется колбэк. Он может модифицировать DOM.
+  3. Как только колбэк закончил выполнение, браузер покидает контекст JavaScript и перерисовывает
+     представление основываясь на изменениях DOM.
+
+Angular изменяет обычный поток выполнения JavaScript, организуя собственный цикл обработки событий. Это разделяет 
+контекст JavaScript на классический и контекст исполнения Angular. При этом только операции, выполненные в контексте 
+исполнения Angular, получат выгоду от связывания данных, обработки исключений, отслеживания свойств и прочих операций. 
+Можно также использовать вызов $apply() для работы в контексте исполнения Angular из обычного JavaScript. Но имейте 
+в виду, что в большинстве мест (в контроллерах, сервисах) $apply() уже был вызван директивой, обрабатывающей то или 
+иное событие. Явный вызов $apply() необходим только для реализации своих собственных обработчиков событий или когда 
+вы работаете с механизмом обратных вызовов в сторонних библиотеках.
+
+  1. Вход в контекст исполнения Angular выполняется вызовом {@link guide/scope scope}`. `{@link api/ng.$rootScope.Scope#$apply $apply}`(stimulusFn)`, где stimulusFn - функция, содержащая код, который необходимо выполнить в контексте Angular.
+  2. Angular выполняет функцию `stimulusFn()`, которая обычно меняет состояние приложения.
+  3. Angular запускает цикл {@link api/ng.$rootScope.Scope#$digest $digest}, состоящий из двух меньших циклов, один из которых обрабатывает очередь {@link
+     api/ng.$rootScope.Scope#$evalAsync $evalAsync}, второй — список {@link
+     api/ng.$rootScope.Scope#$watch $watch}. Цикл {@link api/ng.$rootScope.Scope#$digest
+     $digest} выполняется до тех пор, пока модель не синхронизируется. Это означает, что {@link api/ng.$rootScope.Scope#$evalAsync $evalAsync} опустошится, а в {@link api/ng.$rootScope.Scope#$watch $watch} не останется никаких изменений.
+  4. Очередь {@link api/ng.$rootScope.Scope#$evalAsync $evalAsync} используется для планирования работы, которая должна выполниться вне текущего стекового фрейма, но перед
+     тем, как браузер отрисует представление. Это обычно делается с помощью `setTimeout(0)`, но
+     способ с `setTimeout(0)` медленный и может вызвать мерцание на странице, так как браузер
+     отрисовывает представление после каждого события.
+  5. Список {@link api/ng.$rootScope.Scope#$watch $watch} - это набор выражений, которые
+     могли измениться с прошлой итерации. Если обнаружено изменение, вызывается
+     функция `$watch`, которая, как правило, обновляет значение в DOM.
+  6. При завершении цикла {@link api/ng.$rootScope.Scope#$digest $digest} поток выполнения выходит из среды Angular и контекста JavaScript. Это также влечет за собой перерисовку области вывода для отображения всех произошедших в DOM изменений.
+
+Ниже объяснено, как в примере `Hello world` достигается эффект связывания данных когда пользователь вводит текст в 
+поле ввода. 
+
+  1. В фазе компиляции:
+     1. {@link guide/directive Директива} {@link api/ng.directive:ngModel ng-model} совместно с {@link
+        api/ng.directive:input input} устанавливает обработчик `keydown` на элемент `<input>`.
+     2. Вставка {@link api/ng.$interpolate &#123;&#123;name&#125;&#125; }
+        задает функцию {@link api/ng.$rootScope.Scope#$watch $watch} для уведомления об изменениях `name`.
+  2. В фазе выполнения:
+     1. Нажатие клавиши «`X`» вызывает браузерное событие `keydown` в текстовом поле.
+     2. Директива {@link api/ng.directive:input input} перехватывает
+        изменение значения в текстовом поле и вызывает {@link
+        api/ng.$rootScope.Scope#$apply $apply}`("name = 'X';")` для
+        обновления модели внутри контекста выполнения Angular.
+     3. Angular устанавливает `name = 'X';` в модели.
+     4. Запускается цикл {@link api/ng.$rootScope.Scope#$digest $digest}.
+     5. Список {@link api/ng.$rootScope.Scope#$watch $watch} замечает изменение
+        свойства `name` и уведомляет вставку {@link api/ng.$interpolate
+        &#123;&#123;name&#125;&#125; }, которая, в итоге, обновляет DOM.
+     6. Angular выходит из контекста выполнения, что, в свою очередь, завершает обработку события `keydown` вместе с завершением выполнения контекста JavaScript.
+     7. Браузер перерисовывает представление с обновлённым текстом.
+
+<div class="clear">
+</div>
+<example>
+  <file name="index.html">
+    <input ng-model="name">
+    <p>Hello {{name}}!</p>
+  </file>
+</example>
+
+<a name="scope"></a>
+#Область видимости (scope)
+
+{@link guide/scope Область видимости} отвечает за отслеживание изменений в определенной части модели и обеспечивает 
+контекст исполнения для выражений. Области видимости вкладываются друг в друга, создавая иерархическую структуру, 
+тесно связанную со структурой DOM. (См. документацию по отдельным директивам для выяснения, какие директивы приводят 
+к созданию новых областей видимости.)
+
+Следующий пример показывает, как значения {@link guide/expression выражения} `name` вычисляются по-разному в 
+зависимости от контекста в котором они вычисляются. Диаграмма, изображающая границы областей видимости, приведена 
+после примера.
+
+<div class="clear">
+</div>
+<div class="show-scope">
+<example>
+  <file name="index.html">
+    <div ng-controller="GreetCtrl">
+      Hello {{name}}!
+    </div>
+    <div ng-controller="ListCtrl">
+      <ol>
+        <li ng-repeat="name in names">{{name}}</li>
+      </ol>
+    </div>
+  </file>
+  <file name="script.js">
+    function GreetCtrl($scope) {
+      $scope.name = 'World';
+    }
+
+    function ListCtrl($scope) {
+      $scope.names = ['Igor', 'Misko', 'Vojta'];
+    }
+  </file>
+  <file name="style.css">
+    .show-scope .doc-example-live.ng-scope,
+    .show-scope .doc-example-live .ng-scope  {
+      border: 1px solid red;
+      margin: 3px;
+    }
+  </file>
+</example>
+</div>
+
+<img class="center" src="img/guide/concepts-scope.png">
+
+
+<a name="controller"></a>
+# Контроллер
+
+<img class="pull-right" style="padding-left: 3em; padding-bottom: 1em;" src="img/guide/concepts-controller.png">
+
+Контроллер это код, находящийся позади представления. Его работа — создавать модель и транслировать ее в 
+представление вместе с колбэками. Представление — это проекция области видимости на шаблон (HTML-шаблон). Область 
+видимости — своего рода клей, обеспечивающий синхронизацию данных модели с представлением и перенаправляющий события 
+в контроллер.
+
+Разделение контроллера и представления крайне важно, поскольку:
+
+  * Контроллер написан на JavaScript. JavaScript — императивный язык. Императивность отлично подходит для описания поведения приложения. Контроллер не должен содержать никакой информации о правилах отображения данных (ссылок на DOM, или HTML-фрагментов)
+  * Шаблон представления написан на HTML. HTML — декларативный язык. Декларативность отлично подходит для описания пользовательского интерфейса. Представление не должно содержать никаких элементов, описывающих поведение.
+  * Поскольку контроллер не заботится об отображении, то может существовать множество представлений, связанных с одним контроллером. Это важный факт для бесшовного изменения способа отображения, поддержки различных устройство-зависимых представлений (мобильник или десктоп), а также обеспечения тестируемости.
+
+<div class="clear">
+</div>
+<example>
+  <file name="index.html">
+    <div ng-controller="MyCtrl">
+      Hello {{name}}!
+      <button ng-click="action()">
+        OK
+      </button>
+    </div>
+  </file>
+  <file name="script.js">
+    function MyCtrl($scope) {
+      $scope.action = function() {
+        $scope.name = 'OK';
+      }
+
+      $scope.name = 'World';
+    }
+  </file>
+</example>
+
+
+<a name="model"></a>
+# Модель
+
+<img class="pull-right" style="padding-left: 3em; padding-bottom: 1em;" src="img/guide/concepts-model.png">
+
+Модель — это данные которые объединяются с шаблоном для генерации представления. Для поддержки интерпретации 
+модели в представление, модель должна быть доступна через ссылки на её данные в области видимости. В отличии от 
+других фреймворков, Angular не устанавливает никаких ограничений или требований к модели. Нет классов, которые 
+должны наследовать определенные методы для доступа или изменения модели. Модель может быть как примитивным,  
+хранящим пары ключ-значение так и полноценным объектом. В общем, модель это всего-навсего обычный JavaScript объект.
+
+
+<div class="clear">
+</div>
+
+
+<a name="view"></a>
+# Представление (или вид)
+
+<img class="pull-right" style="padding-left: 3em; padding-bottom: 1em;" src="img/guide/concepts-view.png">
+
+Представление это то, что видят пользователи. Представление начинает свою жизнь как шаблон, который затем 
+объединяется с данными модели, и в завершении отображается в DOM-дереве браузера. У Angular абсолютно другой 
+подход к интерпретации представлений, нежели в большинстве других систем шаблонизации.
+
+  * **Другие** - большинство систем шаблонизации берут свое начало как HTML-строки со специальным языком разметки. Зачастую, разметка шаблона нарушает синтаксис HTML, что означает, что шаблон не может редактироваться в обычном HTML редакторе.  Строка шаблона парсится шаблонизатором и объединяется с данными. Результат объединения — HTML-строка. Эта строка записывается в модель браузера, с помощью вызова innerHTML, который вынуждает браузер повторно отобразить HTML в области вывода. при изменении модели весь процесс должен повториться. Детализация шаблона определяет и детализацию изменений в DOM. Ключевая особенность тут в том, что система шаблонизации работает со строками.
+  * **Angular** - Angular совершенно другой, поскольку его система работы с шаблонами работает с DOM-объектами, а не со строками. Шаблон по прежнему написан в виде HTML-строки но это чистый HTML (а не HTML, разбавленный элементами шаблона). Браузер парсит этот HTML в DOM и этот DOM становится входными данными для шаблонизатора, известного как компилятор. Компилятор ищет директивы, которые, в свою очередь, определяют отслеживаемые элементы в модели. Результатом является постоянно обновляемое представление, которое не нуждается в повторной генерации на основе измененных данных. Модель становится единственным достоверным источником данных для представления.
+
+<div class="clear">
+</div>
+
+<example>
+  <file name="index.html">
+    <div ng-init="list = ['Chrome', 'Safari', 'Firefox', 'IE'] ">
+      <input ng-model="list" ng-list> <br>
+      <input ng-model="list" ng-list> <br>
+      <pre>list={{list}}</pre> <br>
+      <ol>
+        <li ng-repeat="item in list">
+          {{item}}
+        </li>
+      </ol>
+    </div>
+  </file>
+</example>
+
+
+<a name="directives"></a>
+# Директивы
+
+Директивы — это изменение поведения или преобразование модели DOM, связанное с пользовательским атрибутом, именем элемента, или css классом. Директивы позволяют расширять HTML синтаксис, в декларативной форме. Ниже приведен пример связывания данных для директивы `contenteditable`.
+
+<example module="directive">
+  <file name="script.js">
+    angular.module('directive', []).directive('contenteditable', function() {
+      return {
+        require: 'ngModel',
+        link: function(scope, elm, attrs, ctrl) {
+          // вид -> модель
+          elm.bind('blur', function() {
+            scope.$apply(function() {
+              ctrl.$setViewValue(elm.html());
+            });
+          });
+
+          // модель -> вид
+          ctrl.$render = function(value) {
+            elm.html(value);
+          };
+
+          // загрузка начального значения из DOM
+          ctrl.$setViewValue(elm.html());
+        }
+      };
+    });
+  </file>
+  <file name="index.html">
+    <div contentEditable="true" ng-model="content">Измените текст</div>
+    <pre>model = {{content}}</pre>
+  </file>
+  <file name="style.css">
+    div[contentEditable] {
+      cursor: pointer;
+      background-color: #D0D0D0;
+      margin-bottom: 1em;
+      padding: 1em;
+    }
+  </file>
+</example>
+
+<a name="filters"></a>
+# Фильтры
+
+{@link api/ng.$filter Фильтры} преобразуют данные. Обычно они используются в связке с текущей локалью пользователя, чтобы форматировать данные в специфичный для данной локализации формат. Фильтры близки по духу к конвейерам в UNIX и используют тот же синтаксис `|` (вертикальная черта)
+
+<example>
+  <file name="index.html">
+    <div ng-init="list = ['Chrome', 'Safari', 'Firefox', 'IE'] ">
+      Формат числа: {{ 1234567890 | number }} <br>
+      фильтрация массива <input ng-model="predicate">
+      {{ list | filter:predicate | json }}
+    </div>
+  </file>
+</example>
+
+
+<a name="module"></a>
+<a name="injector"></a>
+# Модули и инжектор
+
+<img class="pull-right" style="padding-left: 3em; padding-bottom: 1em;" src="img/guide/concepts-module-injector.png">
+
+{@link api/AUTO.$injector Инжектор} — это надстройщик всех сервисов. Для каждого {@link api/ng.directive:ngApp Angular-приложения} существует один и только один {@link api/AUTO.$injector инжектор}. {@link api/AUTO.$injector Инжектор} позволяет находить экземпляры объектов по их именам. {@link api/AUTO.$injector Инжектор} поддерживает внутри себя кэш объектов, таким образом несколько вызовов поиска какого-либо объекта вернут один и тот же экземпляр. Если {@link api/AUTO.$injector инжектор} ничего не находит, он просит фабрику создать новый экземпляр.
+
+{@link api/angular.Module Модуль} — это способ настройки фабричного экземпляра инжектора (известного как {@link api/AUTO.$provide provider}) по просьбе инжектора.
+
+<div class='clear'></div>
+<pre>
+  // Создание модуля
+  var myModule = angular.module('myModule', [])
+
+  // Конфигурация инжектора
+  myModule.factory('serviceA', function() {
+    return {
+      // поместите сюда код для создания объекта
+    };
+  });
+
+  // создание инжектора и конфигурация его из модуля 'myModule'
+  var $injector = angular.injector(['myModule']);
+
+  // получение объекта из инжектора по имени
+  var serviceA = $injector.get('serviceA');
+
+  // всегда истинно из-за внутреннего кэша экземпляров
+  $injector.get('serviceA') === $injector.get('serviceA');
+</pre>
+
+
+
+Но самая классная фишка {@link api/AUTO.$injector инжектора} в том, что он может использоваться для {@link api/AUTO.$injector#invoke вызова} методов и {@link
+api/AUTO.$injector#instantiate инстанцирования} типов. Это как раз та магия, которая позволяет методам и типам запрашивать свои зависимости извне, а не искать их самим.
+
+<pre>
+  // Вы пишете функции типа этой.
+  function doSomething(serviceA, serviceB) {
+    // тут какие-то действия.
+  }
+
+  // Angular создает инжектор для вашего приложения
+  var $injector = ...;
+
+  ///////////////////////////////////////////////
+  // вот так разруливал зависимости между компонентами в коде ваш дедушка.
+  var serviceA = $injector.get('serviceA');
+  var serviceB = $injector.get('serviceB');
+
+  // теперь можно вызывать функцию
+  doSomething(serviceA, serviceB);
+
+  ///////////////////////////////////////////////
+  // а вот действительно классный способ управления зависимостями.
+  // $injector сам передаст необходимые аргументы функции
+  $injector.invoke(doSomething); // Вот так фреймворк вызывает ваши функции
+</pre>
+
+Заметьте, всё что вам нужно написать — это функция и список её зависимостей в аргументах. Когда Angular {@link api/AUTO.$injector#invoke вызовет} функцию, он автоматически подставит все параметры.
+
+Посмотрите ниже на `ClockCtrl` и обратите внимание на то как перечислены зависимости в аргументах. Когда {@link api/ng.directive:ngController ng-controller} инстанциирует контроллер, он автоматически предоставит необходимые зависимости. Нет нужды создавать эти компоненты самому, искать уже созданные экземпляры или даже вытаскивать их из инжектора вручную.
+
+<example module="timeExampleModule">
+  <file name="index.html">
+    <div ng-controller="ClockCtrl">
+      Текущее время: {{ time.now }}
+    </div>
+  </file>
+  <file name="script.js">
+    angular.module('timeExampleModule', []).
+      // Объявим новый, доступный для инъекций объект
+      // и назовем его time
+      factory('time', function($timeout) {
+        var time = {};
+
+        (function tick() {
+          time.now = new Date().toString();
+          $timeout(tick, 1000);
+        })();
+        return time;
+      });
+
+    // Обратите внимание на то, что можно просто запросить time
+    // и запрос будет удовлетворен. Не нужно ничего искать.
+    function ClockCtrl($scope, time) {
+      $scope.time = time;
+    }
+  </file>
+</example>
+
+
+<a name="angular_namespace"></a>
+# Пространство имен Angular
+
+Чтобы предотвратить случайные пересечения имён, Angular добавляет к именам, которые потенциально могут вызвать конфликт, префикс `$`. Пожалуйста, не используйте префикс `$` в своём коде, так как он может конфликтовать с кодом фреймворка.

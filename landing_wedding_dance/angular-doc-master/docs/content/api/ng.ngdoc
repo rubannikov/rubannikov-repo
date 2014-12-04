@@ -1,0 +1,5 @@
+@ngdoc overview
+@name ng
+@description
+
+`ng` это модуль Angular, который содержит все основные сервисы Angular.

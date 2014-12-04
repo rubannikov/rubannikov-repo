@@ -1,0 +1,60 @@
+@ngdoc overview
+@name Developer Guide: Templates: Filters: Создание фильтров
+@description
+
+Написать собственный фильтр очень просто: достаточно зарегистрировать новый фильтр (внедренный) фабричной функцией 
+в ваш модуль. Фабричная функция должна возвращать новую функцию фильтра, которая принимает входное значение
+в качестве первого аргумента. Любые аргументы фильтра передаются в качестве дополнительных аргументов в 
+функцию фильтра.
+
+Следующий пример фильтра переворачивает текстовую строку. Кроме того, он опционально преобразует текст в 
+верхний регистр.
+
+<doc:example module="MyReverseModule">
+<doc:source>
+<script>
+  angular.module('MyReverseModule', []).
+    filter('reverse', function() {
+      return function(input, uppercase) {
+        var out = "";
+        for (var i = 0; i < input.length; i++) {
+          out = input.charAt(i) + out;
+        }
+        // условная часть для необязательного аргумента
+        if (uppercase) {
+          out = out.toUpperCase();
+        }
+        return out;
+      }
+    });
+
+  function Ctrl($scope) {
+    $scope.greeting = 'hello';
+  }
+</script>
+
+<div ng-controller="Ctrl">
+  <input ng-model="greeting" type="greeting"><br>
+  No filter: {{greeting}}<br>
+  Reverse: {{greeting|reverse}}<br>
+  Reverse + uppercase: {{greeting|reverse:true}}<br>
+</div>
+</doc:source>
+<doc:scenario>
+  it('should reverse greeting', function() {
+    expect(binding('greeting|reverse')).toEqual('olleh');
+    input('greeting').enter('ABC');
+    expect(binding('greeting|reverse')).toEqual('CBA');
+  });
+</doc:scenario>
+</doc:example>
+
+
+## Связанные разделы
+
+* {@link dev_guide.templates.filters Фильтры}
+* {@link compiler HTML-компилятор в Angular}
+
+## Связанное API
+
+* {@link api/ng.$filter API фильтров}

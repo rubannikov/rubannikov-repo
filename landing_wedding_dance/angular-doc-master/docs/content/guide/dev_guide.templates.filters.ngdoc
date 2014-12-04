@@ -1,0 +1,22 @@
+@ngdoc overview
+@name Developer Guide: Templates: Фильтры
+@description
+
+Фильтры в Angular форматируют данные для отображения пользователю.
+
+Например, имеется объект данных, который должен быть отформатирован в соответствии с языковыми настройками, прежде чем
+он будет показан пользователю. Можно передать выражения через цепочку фильтров следующим образом:
+
+        name | uppercase
+
+Анализатор выражения просто передает значение name в фильтр {@link api/ng.filter:uppercase uppercase}.
+
+
+## Связанные разделы
+
+* {@link dev_guide.templates.filters.using_filters Использование фильтров}
+* {@link dev_guide.templates.filters.creating_filters Создание фильтров}
+
+## Связанное API
+
+* {@link api/ng.$filter API фильтров}

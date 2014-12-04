@@ -1,0 +1,152 @@
+@ngdoc overview
+@name Cookbook: Внешнее связывание
+@description
+
+AJAX-приложение никогда не уходит с index.html (и т.п.). Вместо этого, оно изменяет DOM одной этой страницы без 
+перезагрузки. Это делает AJAX-приложения быстрыми, но создает проблему с одним и тем же URL-адресом для всего 
+приложения, что мешает отправить ссылку на конкретный экран по электронной почте. Внешнее связывание позволяет 
+закодировать состояние приложения в URL, так чтобы можно было использовать его в качестве
+закладки и приложение могло бы восстановить свое состояние из URL.
+
+Angular не требует иметь дело с закладками в каждом конкретном случае, но для общего случая, 
+описанного здесь, у него имеются соответствующие сервисы, с помощью которых это легко сделать.
+
+# Допущения
+
+Приложение состоит из одной HTML-страницы, которая загружает всё приложение. Назовем это страницу хромированной.
+Приложение разделено на несколько экранов (или видов), которые может посетить пользователь. Например:
+основной экран, экран настройки, экран сведений и т.д. Для каждого из этих экранов, необходимо
+назначить URL так чтобы его можно было сделать закладкой, а затем восстановить. Каждый из этих экранов будет
+связан с контроллером, который определит его поведение. В самом распространенном случае экран будет состоять 
+из HTML фрагмента, который будем называть частичкой. Экраны могут состоять из множественных частичек, но 
+одиночная частичка является наиболее распространенной конструкцией. В этом примере граница между частичками 
+показана синей линией.
+
+Можно сделать таблицу маршрутизации которая укажет, какой URL к какому шаблону частички вида относится и
+к какому контроллеру.
+
+# Пример
+
+В этом примере показано простое приложение, состоящее из двух экранов:
+
+* Приветствия: url `welcome` Отображает контактную информацию пользователя.
+* Настроек: url `settings` Показывает редактор контактной информации.
+
+<example module="deepLinking" deps="angular-sanitize.js">
+ <file name="script.js">
+   angular.module('deepLinking', ['ngSanitize'])
+     .config(function($routeProvider) {
+        $routeProvider.
+          when("/welcome",  {templateUrl:'welcome.html',  controller:WelcomeCntl}).
+          when("/settings", {templateUrl:'settings.html', controller:SettingsCntl});
+     });
+
+   AppCntl.$inject = ['$scope', '$route']
+   function AppCntl($scope, $route) {
+    $scope.$route = $route;
+
+    // инициализация модели, чтобы сделать что-нибудь полезное
+    $scope.person = {
+     name:'anonymous',
+     contacts:[{type:'эл. почта', url:'anonymous@example.com'}]
+    };
+   }
+
+   function WelcomeCntl($scope) {
+    $scope.greet = function() {
+     alert("Привет " + $scope.person.name);
+    };
+   }
+
+   function SettingsCntl($scope, $location) {
+    $scope.cancel = function() {
+     $scope.form = angular.copy($scope.person);
+    };
+
+    $scope.save = function() {
+     angular.copy($scope.form, $scope.person);
+     $location.path('/welcome');
+    };
+
+    $scope.cancel();
+   }
+ </file>
+ <file name="style.css">
+   [ng-view] {
+     border: 1px solid blue;
+     margin: 0;
+     padding:1em;
+   }
+
+   .partial-info {
+      background-color: blue;
+      color: white;
+      padding: 3px;
+    }
+ </file>
+ <file name="index.html">
+    <div ng-controller="AppCntl">
+      <h1>Хромированное приложение</h1>
+      [ <a href="welcome">Приветствие</a> | <a href="settings">настройка</a> ]
+      <hr/>
+      <span class="partial-info">
+        Частичка: {{$route.current.template}}
+      </span>
+      <div ng-view></div>
+      <small>Подвал приложения </small>
+    </div>
+ </file>
+ <file name="settings.html">
+   <label>Имя:</label>
+   <input type="text" ng:model="form.name" required>
+
+   <div ng:repeat="contact in form.contacts">
+     <select ng:model="contact.type">
+       <option>url</option>
+       <option>эл. почта</option>
+       <option>телефон</option>
+     </select>
+     <input type="text" ng:model="contact.url">
+     [ <a href="" ng:click="form.contacts.$remove(contact)">×</a> ]
+   </div>
+   <div>
+     [ <a href="" ng:click="form.contacts.$add()">добавить</a> ]
+   </div>
+
+   <button ng:click="cancel()">Отмена</button>
+   <button ng:click="save()">Сохранить</button>
+ </file>
+ <file name="welcome.html">
+   Привет {{person.name}},
+   <div>
+     Контактная информация:
+     <div ng:repeat="contact in person.contacts">{{contact.type}}:
+       <span ng-bind-html="contact.url|linky"></span>
+     </div>
+   </div>
+ </file>
+ <file name="scenario.js">
+   it('необходимо перейти по URL-адресу', function() {
+     element('a:contains(Приветствие)').click();
+     expect(element('[ng-view]').text()).toMatch(/Привет anonymous/);
+     element('a:contains(настройка)').click();
+     input('form.name').enter('yourname');
+     element(':button:contains(Сохранить)').click();
+     element('a:contains(Приветствие)').click();
+     expect(element('[ng-view]').text()).toMatch(/Привет yourname/);
+   });
+ </file>
+</example>
+
+
+
+# На что следует обратить внимание
+
+* Маршруты определяются в классе `AppCntl`. Инициализация контроллера служит причиной инициализации
+  сервиса {@link api/ng.$route $route} с соответствующим маршрутом URL.
+* Сервис {@link api/ng.$route $route} наблюдает за URL и создает экземпляр соответствующего контроллера, при 
+  изменении URL.
+* Виджет {@link api/ng.directive:ngView ngView} загружает вид при изменении URL. Он так же устанавливает 
+  область видимости вида для нового экземпляра контроллера.
+* Изменение URL достаточно для изменения контроллера и виды. Не имеет значения
+  изменился ли URL программно или вручную.

@@ -1,0 +1,165 @@
+@ngdoc overview
+@name Tutorial: 9 - Фильтры
+@description
+
+<ul doc-tutorial-nav="9"></ul>
+
+
+В этом уроке вы научитесь создавать свои собственные фильтры.
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 9.</p>
+        <pre>git checkout -f step-9</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-9/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 9.</p>
+        <pre>git checkout -f step-9</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-9/app">сервере Angular</a>
+        </p>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+Перейдите на любую страницу с подробным описанием телефона.
+
+На предыдущем этапе, для отображения наличия либо отсутствия определённой фичи у телефона использовались
+булевы значения "true" и "false". Теперь же, мы применили фильтр, чтобы отображать на месте этих строк
+пиктограммки: ✓ вместо "true" и ✘ вместо "false". Давайте посмотрим, что представляет из себя код фильтра.
+
+Ключевые изменения приведены ниже, полный дифф вы можете просмотреть на {@link
+https://github.com/angular/angular-phonecat/compare/step-8...step-9 GitHub}:
+
+
+## Создание фильтра
+
+Для создания нового фильтра, вам придётся написать новый модуль `phonecatFilters` и зарегистрировать
+свежесозданный фильтр в нём:
+
+__`app/js/filters.js`:__
+<pre>
+angular.module('phonecatFilters', []).filter('checkmark', function() {
+  return function(input) {
+    return input ? '\u2713' : '\u2718';
+  };
+});
+</pre>
+
+Имя нашего фильтра - "checkmark". В качестве входного параметра `input` он ожидает булево значение -
+истину либо ложь и мы используем тернарный оператор для того чтобы вернуть один из символов юникода, которые
+мы выбрали для представления истины или лжи (`\u2713` и `\u2718`).
+
+Теперь, когда фильтр готов, мы должны зарегистрировать модуль `phonecatFilters` как зависимость для
+главного модуля `phonecat`:
+
+__`app/js/app.js`:__
+<pre>
+...
+angular.module('phonecat', ['phonecatFilters']).
+...
+</pre>
+
+
+## Шаблон
+
+Так как код фильтра лежит в `app/js/filters.js`, мы должны подключить его в наш шаблон:
+
+__`app/index.html`:__
+<pre>
+...
+ <script src="js/controllers.js"></script>
+ <script src="js/filters.js"></script>
+...
+</pre>
+
+Синтакс использования фильтров в Angular:
+
+    {{ expression | filter }}
+
+Посмотрим, как работает фильтр на странице подробного описания телефона:
+
+
+
+__`app/partials/phone-detail.html`:__
+<pre>
+...
+    <dl>
+      <dt>ИК-порт</dt>
+      <dd>{{phone.connectivity.infrared | checkmark}}</dd>
+      <dt>GPS</dt>
+      <dd>{{phone.connectivity.gps | checkmark}}</dd>
+    </dl>
+...
+</pre>
+
+
+## Тестирование
+
+Фильтры, как и любые другие компоненты, должны быть покрыты тестами, а тесты, в свою очередь, не должны
+быть сложными для написания:.
+
+__`test/unit/filtersSpec.js`:__
+<pre>
+describe('filter', function() {
+
+  beforeEach(module('phonecatFilters'));
+
+
+  describe('checkmark', function() {
+
+    it('должен конвертировать истину и ложь в галочку и крестик',
+        inject(function(checkmarkFilter) {
+      expect(checkmarkFilter(true)).toBe('\u2713');
+      expect(checkmarkFilter(false)).toBe('\u2718');
+    }));
+  });
+});
+</pre>
+
+Обратите внимание, что вам нужно сконфигурировать тестовый инжектор для использования модуля `phonecatFilters`,
+иначе код фильтра не будет внедрён и выполнен.
+
+Теперь, вы можете видеть следующий вывод в закладке Karma:
+
+        Chrome 22.0: Executed 4 of 4 SUCCESS (0.034 secs / 0.012 secs)
+
+
+# Давайте поэкспериментируем
+
+* Поэкспериментируйте со {@link api/ng.$filter встроенными фильтрами Angular} и добавьте следующие привязки на
+`index.html`:
+  * `{{ "строка в нижнем регистре" | uppercase }}`
+  * `{{ {foo: "bar", baz: 23} | json }}`
+  * `{{ 1304375948024 | date }}`
+  * `{{ 1304375948024 | date:"MM/dd/yyyy @ h:mma" }}`
+
+*  А ещё, можно создать модель, привязанную к текстовому полю и выводить уже фильтрованное значение, например:
+
+        <input ng-model="userInput"> Uppercased: {{ userInput | uppercase }}
+
+
+# Идём дальше
+
+Теперь, когда вы знаете как писать и тестировать свои фильтры, переходите к  {@link step_10 шагу 10}, чтобы
+узнать как можно сделать станичку описания телефона ещё более клёвой!
+
+
+<ul doc-tutorial-nav="9"></ul>

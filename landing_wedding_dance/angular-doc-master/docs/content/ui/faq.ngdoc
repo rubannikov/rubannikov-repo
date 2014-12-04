@@ -1,0 +1,77 @@
+@ngdoc overview
+@name UI-Router: FAQ
+@description
+
+### Как: Настройка ui-router из множества модулей
+
+Как настроить ui-router измножественных модулей, чтобы не оказалось, что передается тот же провайдер состояния?
+
+Чаще всего проблема возникает из-за неправильно определения зависимостей. Например:
+
+<pre>
+angular.module('application', [...]).config(function ($stateProvider) {
+  $stateProvider
+    .state("feature1", { url : '/Feature1'...})
+    .state("feature2", { url : '/Feature2'...});
+});
+angular.module('feature1', ['application', ...]).config(function ($stateProvider) {
+  $stateProvider
+    .state("feature1.home", {...})
+    .state("feature1.detail", {...});
+});
+</pre>
+
+**Пример:** {@link http://plnkr.co/edit/WSmPX7JITGOsZ07L1UQP?p=preview}
+
+**Примечание:** Помните, что зависимости объявляются только один раз во время создания модуля, поэтому если сделать 
+несколько вызовов `angular.module` для одного и того же модуля, то только первый вызов должен определять зависимости.
+
+### Как: Открытие диалогового/модального окна в определенном состоянии
+
+Как сказать ui-router'у, чтобы в определенном состоянии он открыл диалоговое или модальное окно вместо выгрузки
+шаблонов из ui-view?
+
+Вот пример, как это сделать, используя 
+[$dialog](https://github.com/angular-ui/bootstrap/blob/master/src/dialog/README.md) из сервиса ui-bootstrap.
+Показывается только на примере функции onEnter. Без шаблона, контроллера и т.д. Так, по существу, будет показана 
+диалоговое окно, а затем, при закрытии, происходит переход в состояние `items`. Вы по-прежнему отвечаете за 
+обработку того, в какое состоянии перейдет приложение при загрытии диалогового окна.
+
+<pre>
+$stateProvider.state("items.add", {
+    url: "/add",
+    onEnter: function($stateParams, $state, $dialog, $resource) {
+
+        var Item = $resource(...);
+
+        $dialog.dialog({
+            keyboard: true,
+            templateUrl: "items/add",
+            backdropClick: false,
+            dialogFade: true,
+            controller: ['$scope', function($scope) {
+
+                angular.extend($scope, {
+                    title: "Create new item",
+                    button: "Add",
+                    campaign: new Item(),
+                    $stateParams: $stateParams,
+                    $state: $state,
+                    save: function() {
+                        var self = $scope;
+
+                        this.item.$save(function() {
+                            self.$emit('items.refresh');
+                            $state.transitionTo('items');
+                        });
+                    }
+                });
+            }]
+        }).open().then(function(result) {
+            if (!result) {
+                return $state.transitionTo("items");
+            }
+        });
+    }
+});
+</pre>

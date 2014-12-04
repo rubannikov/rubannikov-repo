@@ -1,0 +1,44 @@
+   <!--<!doctype html>
+        <html ng-app>
+            <head>
+                <meta charset="UTF-8">
+                <title>wedding dance</title>
+                <link rel="stylesheet" href="css/main.css" type="text/css">
+                <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+            </head>
+            <body>
+                <div>
+                    <label>Имя:</label>
+                    <input type="text" ng-model="yourName" placeholder="Введите свое имя">
+                    <hr>
+                    <h1>Привет {{yourName}}!</h1>
+                </div>
+            </body>
+        </html> -->
+        
+           <!doctype html>
+    <html ng-app>
+        <head>
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+            <script src="todo.js"></script>
+            <link rel="stylesheet" href="todo.css">
+        </head>
+        <body>
+            <h2>Список дел</h2>
+            <div ng-controller="TodoCtrl">
+                <span>Осталось {{remaining()}} из {{todos.length}}</span>
+                [ <a href="" ng-click="archive()">архив</a> ]
+                <ul class="unstyled">
+                        <li ng-repeat="todo in todos">
+                        <input type="checkbox" ng-model="todo.done">
+                        <span class="done-{{todo.done}}">{{todo.text}}</span>
+                        </li>
+                </ul>
+                <form ng-submit="addTodo()">
+                    <input type="text" ng-model="todoText" size="30"
+                    placeholder="впишите новое дело">
+                    <input class="btn-primary" type="submit" value="добавить">
+                </form>
+            </div>
+        </body>
+    </html>

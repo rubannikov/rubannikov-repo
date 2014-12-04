@@ -1,0 +1,136 @@
+@ngdoc overview
+@name Tutorial: 6 - Ссылки и картинки
+@description
+
+<ul doc-tutorial-nav="6"></ul>
+
+На этом шаге мы добавим миниатюры изображений (thumbnail images) в список телефонов, а также ссылки, 
+которые на данный момент никуда не будут вести. В последующих шагах, мы будем использовать эти ссылки 
+для отображения дополнительной информации о телефонах в каталоге.
+
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 6.</p>
+        <pre>git checkout -f step-6</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-6/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 6.</p>
+        <pre>git checkout -f step-6</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-6/app">сервере Angular</a>
+        </p>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+Теперь вы должны увидеть ссылки и изображения телефонов в списке.
+
+Наиболее важные изменения приведены ниже. Вы можете увидеть полный список изменений перейдя по ссылке {@link
+https://github.com/angular/angular-phonecat/compare/step-5...step-6 GitHub}:
+
+
+## Данные
+
+Обратите внимание, что файл `phones.json` содержит уникальные идентификаторы и url-адреса изображений 
+для каждого телефона. URL-адреса указывают на директорию `app/img/phones/`.
+
+__`app/phones/phones.json`__ (sample snippet):
+<pre>
+ [
+  {
+   ...
+   "id": "motorola-defy-with-motoblur",
+   "imageUrl": "img/phones/motorola-defy-with-motoblur.0.jpg",
+   "name": "Motorola DEFY\u2122 with MOTOBLUR\u2122",
+   ...
+  },
+ ...
+ ]
+</pre>
+
+
+## Шаблон
+
+__`app/index.html`:__
+<pre>
+...
+        <ul class="phones">
+          <li ng-repeat="phone in phones | filter:query | orderBy:orderProp" class="thumbnail">
+            <a href="#/phones/{{phone.id}}" class="thumb"><img ng-src="{{phone.imageUrl}}"></a>
+            <a href="#/phones/{{phone.id}}">{{phone.name}}</a>
+            <p>{{phone.snippet}}</p>
+          </li>
+        </ul>
+...
+</pre>
+
+Для динамической генерации ссылок, которые будут в будущем вести на страницы детального описания телефона, 
+мы использовали уже знакомые двойные фигурные скобки (для связывания) в значении атрибута `href`. В шаге 2 
+мы добавили связывание `{{phone.name}}` как значение для содержания. На этом этапе связывание `{{phone.id}}`
+используется в атрибуте элемента.
+
+Мы также добавили изображение телефона рядом с каждой записью, используя тег `image` с директивой {@link
+api/ng.directive:ngSrc ngSrc}. Эта директива сообщает браузеру что нет необходимости обрабатывать `{{ expression }}` в разметке, до тех пор пока '{{expression}}' не будет заменено на значение из модели.
+Это предотвращет запросы на неправильные URL типа `http://localhost:8000/app/{{phone.imageUrl}}`, который браузер сделал бы, если бы
+у нас было только буквальное связывание в атрибуте `src` (`<img  class="diagram" src="{{phone.imageUrl}}">`).
+Использование директивы `ngSrc` предотвращает отправку браузером HTTP-запросов на недопустимые ресурсы.
+
+
+## Тестирование
+
+__`test/e2e/scenarios.js`__:
+<pre>
+...
+    it('should render phone specific links', function() {
+      input('query').enter('nexus');
+      element('.phones li a').click();
+      expect(browser().location().url()).toBe('/phones/nexus-s');
+    });
+...
+</pre>
+
+Мы добавили новый системный тест, чтобы убедиться, что приложение генерирует правильные ссылки на страницы телефонов,
+которые мы будем реализовывать в последующих шагах.
+
+Теперь вы можете перезапустить скрипт `./scripts/e2e-test.sh` или обновить вкладку браузера с системным тестом и
+убедиться, что тесты пройдены, или вы можете увидеть их на {@link
+http://angular.github.com/angular-phonecat/step-6/test/e2e/runner.html нашем сервере Angular}.
+
+
+# Давайте поэкспериментируем
+
+* Попробуйте заменить директиву `ng-src` старым атрибутом `src`. Используя такие инструменты, как Firebug,
+  или в Chrome's Web Inspector, или посмотрите журналы доступа веб-сервера, убедитесь, что приложение действительно
+  делает запрос на `/app/%7B%7Bphone.imageUrl%7D%7D` (или `/app/{{phone.imageUrl}}`).
+
+Проблема здесь в том, что браузер будет совершать (fire) запрос на неверный адрес изображения, как только
+он попадает на тега `img`, который еще находится в обработке Angular-ом. Таким образом, запрос может быть раньше, чем
+Angular вычислит выражение и подставит правильный адрес.
+
+
+# Идем дальше
+
+Теперь, когда вы добавили изображения телефонов и ссылки, вы можете идти дальше на {@link step_07 Шаг 7}, 
+чтобы узнать об Angular-их макетах шаблонов и как Angular позволяет легко создавать приложения, 
+которые имеют несколько представлений (multiple views).
+
+
+<ul doc-tutorial-nav="6"></ul>

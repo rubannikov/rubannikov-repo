@@ -1,0 +1,18 @@
+@ngdoc overview
+@name Developer Guide: MVC в Angular
+@description
+
+Термин Модель–Представление–Контроллер (MVC) с момента создания приобрел различные интерпретации {@link http://martinfowler.com/tags/model-view-controller.html}. Angular по своему использует основные принципы оригинального {@link http://en.wikipedia.org/wiki/Model–view–controller MVC} для построения клиентских веб-приложений.
+
+Кратко о шаблоне MVC:
+
+* Разделение приложения на отдельные представления, данные и логику компонентов
+* Поощрение слабой связи между этими компонентами
+
+Вместе с {@link dev_guide.services сервисами} и {@link di внедрением зависимости}, MVC делает Angular-приложения хорошо структурированными, простыми в поддержке и тестировании.
+
+Следующие разделы описывают, как Angular интерпретирует основные компоненты MVC:
+
+* {@link dev_guide.mvc.understanding_model Модель}
+* {@link dev_guide.mvc.understanding_controller Контроллер}
+* {@link dev_guide.mvc.understanding_view Вид}

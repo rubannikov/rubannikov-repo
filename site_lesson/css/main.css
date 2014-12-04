@@ -1,0 +1,302 @@
+* {
+    margin: 0;
+    padding: 0;
+    outline: none;
+}
+body {
+    background: url("../img/bg.png") #EAEAEA;
+    font: 12px Arial, Tahoma, sans-serif;
+}
+
+h1 { font-size: 31px;
+    color: #666666;
+    padding-top: 6px;
+    padding-left: 21px;
+}
+.h1description {
+    color: #D1D1D1;
+    font-size: 11px;
+    position: absolute;
+    left: 22px;
+    bottom: 8px;
+}
+
+                                        .f_left, #header_navi ul li, h1, .header_buttons ul li, .sb_header>i, .sb_nav ul li a>i {float:left;}
+                                        .f_right, input[name=topsearch], .sb_num3 {float: right;}
+
+a {
+    text-decoration: none;
+}
+.b3radius, .header_buttons ul li, .sb_num3, .sb_num1,.c_button {
+    border-radius: 3px;
+    -webkit-webkit-border-radius: 3px;
+    -moz-webkit-border-radius: 3px;
+    -ms-webkit-border-radius: 3px;
+    -o-webkit-border-radius: 3px;
+    
+}
+#page_bg {
+    background: url("../img/side.png") #fff;
+    margin: 35px auto;
+    width: 1000px;
+    height: 700px;
+    box-shadow: 0px 1px 3px #DDDDDD;
+    -webkit-webkit-box-shadow: 0px 1px 3px #DDDDDD;
+    -moz-webkit-box-shadow: 0px 1px 3px #DDDDDD;
+    -ms-webkit-box-shadow: 0px 1px 3px #DDDDDD;
+    -o-webkit-box-shadow: 0px 1px 3px #DDDDDD;
+    
+}
+
+#header {
+    height: 95px;
+    border-bottom: solid 3px #CCCCCC;
+    background: #FFF;
+}
+
+#header_navi {
+    height: 35px;
+    border-bottom: solid 1px #F1F1F1;
+}
+#header_navi ul {
+    list-style: none;
+    
+}
+#header_navi ul li {
+    border-right: solid 1px #F1F1F1;
+}
+#header_navi ul li:last-child {
+    border-right: none;
+}
+#header_navi ul li a {
+    color: #999999;
+    line-height: 35px;
+    padding: 0 7px;
+    display: block;
+}
+#header_navi ul li a:hover{
+    background: rgba(0,0,0,.05)
+}
+input[name=topsearch] {
+    margin-right: 9px;
+    height: 25px;
+    margin-top: 5px;
+    border: none;
+    box-shadow: inset 0px 1px 3px rgba(0,0,0,.1);
+    background: #F0F0F0;
+    padding:0 5px;
+    width: 145px;
+}
+
+.search_img {
+    margin-top: 10px;
+    margin-right: 6px;
+}
+#header_cont {
+    background: url("../img/grad1.png") repeat-x left top;
+    position: relative;
+    height: 60px;
+}
+.header_right {
+    width: 570px;
+    height: 48px;
+    /*outline: solid 1px #000;*/
+    margin-top: 6px;
+    margin-right: 8px;
+}
+.header_profile {
+    height: 48px;
+    border-right: solid 1px #f1f2f2;
+    padding-right: 5px;
+    max-width: 195px;
+    background: url(../img/header_triangle.png) no-repeat center left 3px;
+    padding-left: 25px;
+    position: relative;
+}
+.header_profile ul {
+    list-style: none;
+    display: none;
+}
+.header_profile:hover {
+    background: url(../img/header_triangle.png) no-repeat center left 3px rgba(0,0,0,0.05);
+}
+.header_profile:hover ul {
+    display: block;
+    position: absolute;
+    top: 48px;
+    background: rgba(0,0,0,0.3);
+    right: -1px;
+    width: 100.5%;
+    color: #FFF;
+    text-shadow: 1px 1px 1px rgba(0,0,0,.3);
+}
+.header_profile:hover ul li {
+    text-align: right;
+    padding: 3px 5px;
+}
+.header_text {
+    color: #515151;
+    max-width: 195px;
+    text-align: right;
+    margin-top: 10px;
+    margin-right: 9px;
+}
+.header_text span {
+    font-size: 10px;
+    color: #868686;
+}
+.hp_photo {
+    border: solid 3px #33cc99;
+    margin-top: 2px;
+}
+.header_buttons ul {
+    list-style: none;
+    margin-top: 12px;
+}
+.header_buttons ul li {
+    background: #33cc99;
+    margin-right: 9px;
+}
+.header_buttons ul li:hover {
+    background: #99cc99;
+}
+.header_buttons ul li:first-child {
+    background: url('../img/header_button_pravila.png') #33cc99 no-repeat center left 5px;
+    
+}
+.header_buttons ul li:last-child {
+    background: url('../img/header_button_upload.png') #33cc99 no-repeat center left 5px;
+    
+}
+.header_buttons ul li a {
+    color: #FFF;
+    padding: 6px;
+    padding-left: 26px;
+    display: block;
+}
+#sidebar {
+    width: 200px;
+    margin-top: 2px;
+}
+.sb_header {
+    background: url(../img/button_h2.png) repeat-x;
+    margin-top: px;
+    color: #FFF;
+    line-height: 31px;
+    padding-left: 6px;
+}
+.sb_header>i {
+    background: url("../img/sprite_h2.png") no-repeat;
+    display: block;
+    height: 15px;
+    width: 15px;
+    margin-top: 8px;
+    margin-right: 6px;
+}
+#h2n2 {
+    margin-top:1px;
+}
+.sb_nav ul {
+    list-style: none;
+}
+.sb_nav ul li {
+    background: url(../img/button_h3.png) repeat-x;
+    color: #FFF;
+    line-height: 31px;
+    padding-left: 6px;
+}
+.sb_nav ul li a {
+    color: #aab5c0;
+    display: block;
+}
+.sb_nav ul li a>i {
+    background: url("../img/sprite_h3n1.png");
+    width: 15px;
+    height: 15px;
+    margin-top: 8px;
+    margin-right: 6px;
+}
+.sb_nav ul li a:hover {
+    color: #fff;
+}
+
+#content {
+    width: 800px;
+    height: 400px;
+}
+.sb_num3 {
+    background: #cc0066;
+    padding: 2px;
+    margin-right: 5px;
+    line-height: 14px;
+    color: #FFF;
+    font-size: 11px;
+    margin-top: 7px;
+    
+}
+.sb_num1 {
+    
+    background: #ffff66;
+    text-shadow: 1px 2px 3px #000;
+}
+.sb_stats ul {
+    list-style: none;
+}
+.sb_stats ul li {
+    line-height: 18px;
+    border-bottom: solid 1px rgba(0,0,0,0,.1);
+    border-top: solid 1px rgba(255,255,255,0.1);
+    color: #FFF;
+    font-size: 11px;
+    padding-left: 6px;
+}
+.sb_stats ul li:first-child {
+    border-top: none;
+}
+.sb_stats ul li:last-child {
+    border-bottom: none;
+}
+.sb_stats ul li>span {
+     color: #cccccc;   
+}
+.copyrights {
+    margin-top: 30px;
+    position: relative;
+    bottom: 0;
+    color: #ccc;
+    font-size: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.copyrights a {
+    color: #006633
+}
+.c_left {
+    width: 305px;
+    overflow: hidden;
+}
+.c_right {
+    overflow: hidden;
+}
+.c_sep {
+    color: #cccccc;
+    width: 1px;
+    height: 100%;
+}
+.c_button {
+    background: #33cc99;
+    padding: 6px;
+    margin-top: 50px;
+}
+
+
+
+
+.clr {
+    clear: both;
+    
+}
+ 
+
+
+Китай город   ул. Моросейка 9/2 стр 1  2этаж   копирка  к елена 

@@ -1,0 +1,165 @@
+@ngdoc overview
+@name Tutorial: 10 - Обработчики событий
+@description
+
+<ul doc-tutorial-nav="10"></ul>
+
+В этом уроке, вы добавите переключатель картинок на страницу деталей телефона.
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 10.</p>
+        <pre>git checkout -f step-10</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-10/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 10.</p>
+        <pre>git checkout -f step-10</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-10/app">сервере Angular</a>
+        </p>
+      </li>
+    </ol>
+  </div>
+
+</div>
+
+Страница с описанием телефона отображает одну большую фотографию выбранного телефона и несколько миниатюр.
+Было бы здорово, если бы мы могли отображать на месте большого изображения увеличенную копию любой из миниатюр с
+помощью щелчка по миниатюре. Давайте-ка посмотрим, как это можно сделать с помощью Angular.
+
+Ключевые изменения приведены ниже, полный дифф вы можете просмотреть на {@link
+https://github.com/angular/angular-phonecat/compare/step-9...step-10 GitHub}:
+
+
+## Контроллер
+
+__`app/js/controllers.js`:__
+<pre>
+...
+function PhoneDetailCtrl($scope, $routeParams, $http) {
+  $http.get('phones/' + $routeParams.phoneId + '.json').success(function(data) {
+    $scope.phone = data;
+    $scope.mainImageUrl = data.images[0];
+  });
+
+  $scope.setImage = function(imageUrl) {
+    $scope.mainImageUrl = imageUrl;
+  }
+}
+
+//PhoneDetailCtrl.$inject = ['$scope', '$routeParams', '$http'];
+</pre>
+
+В контроллере `PhoneDetailCtrl` мы создали свойство `mainImageUrl` и установили его по умолчанию в URL первого
+изображения телефона.
+
+Ещё, мы добавили обработчик события с именем `setImage`, который будет изменять значение `mainImageUrl`.
+
+
+## Шаблон
+
+__`app/partials/phone-detail.html`:__
+<pre>
+<img ng-src="{{mainImageUrl}}" class="phone">
+
+...
+
+<ul class="phone-thumbs">
+  <li ng-repeat="img in phone.images">
+    <img ng-src="{{img}}" ng-click="setImage(img)">
+  </li>
+</ul>
+...
+</pre>
+
+Привязали директиву-аттрибут `ngSrc` большой картинки к свойству `mainImageUrl`.
+
+Также, мы зарегистрировали обработчик {@link api/ng.directive:ngClick `ngClick`} для каждой миниатюры.
+Когда пользователь кликает по миниатюре, будет вызван именно этот обработчик, который вызовет `setImage`
+для подмены свойства `mainImageUrl` на URL изображения с миниатюры.
+
+<div style="display: none">
+TODO!
+<img  class="diagram" src="img/tutorial/tutorial_10-11_final.png">
+</div>
+
+## Тестирование
+
+Чтобы протестировать эту фичу, мы завели два системных теста. Первый проверяет что по умолчанию отображается
+первая картинка телефона. Второй - совершает несколько кликов по миниатюрам и проверяет, что большое изображение
+изменяется в ответ.
+
+__`test/e2e/scenarios.js`:__
+<pre>
+...
+  describe('Страница описания телефона', function() {
+
+...
+
+    it('по умолчанию должна быть выбрана первая картинка', function() {
+      expect(element('img.phone').attr('src')).toBe('img/phones/nexus-s.0.jpg');
+    });
+
+
+    it('картинка должна меняться в ответ на клик', function() {
+      element('.phone-thumbs li:nth-child(3) img').click();
+      expect(element('img.phone').attr('src')).toBe('img/phones/nexus-s.2.jpg');
+
+      element('.phone-thumbs li:nth-child(1) img').click();
+      expect(element('img.phone').attr('src')).toBe('img/phones/nexus-s.0.jpg');
+    });
+  });
+});
+</pre>
+
+Теперь вы можете запустить `./scripts/e2e-test.sh` или обновить страничку браузера с системными тестами чтобы
+проверить ход выполнения тестов. Или же вы можете наблюдать за ними в
+{@link http://angular.github.com/angular-phonecat/step-8/test/e2e/runner.html сервере Angular}.
+
+# Давайте поэкспериментируем
+
+* Добавьте новый метод в контроллер `PhoneDetailCtrl`:
+
+          $scope.hello = function(name) {
+              alert('Привет, ' + (name || 'мир') + '!');
+          }
+
+  и элемент:
+
+          <button ng-click="hello('Elmo')">Привет</button>
+
+  в шаблон `phone-details.html`.
+
+<div style="display: none">
+TODO!
+  The controller methods are inherited between controllers/scopes, so you can use the same snippet
+in the `phone-list.html` template as well.
+
+* Move the `hello` method from `PhoneCatCtrl` to `PhoneListCtrl` and you'll see that the button
+declared in `index.html` will stop working, while the one declared in the `phone-list.html`
+template remains operational.
+</div>
+
+
+# Идём дальше
+
+Итак, с переключателем картинок мы готовы для {@link step_11 11 урока} (последнего!). Из него мы узнаем, как
+лучше запрашивать данные из бэкэнда.
+
+
+<ul doc-tutorial-nav="10"></ul>

@@ -1,0 +1,242 @@
+@ngdoc overview
+@name Tutorial: 3 - Поиск и фильтрация
+@description
+
+<ul doc-tutorial-nav="3"></ul>
+
+
+В предыдущем шаге, мы с вами проделали большую работу, создав основу для приложения. Теперь мы попробуем сделать
+что-то простое. Давайте добавим полнотекстовый поиск (full text search). Да, это будет просто! Также мы продолжим
+писать тесты и напишем тесты для системного тестирования (end-to-end test). Cистемные тесты являются вашими
+хорошими друзьями. Они живут с вашим приложением, следят за ним и быстро обнаруживают регрессию.
+
+
+<div class="tabbable" show="true">
+
+  <div class="tab-pane well" id="git-mac" title="Git на Mac/Linux" value="gitUnix">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 3.</p>
+        <pre>git checkout -f step-3</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-3/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+  
+  <div class="tab-pane well" title="Git на Windows" value="gitWin">
+    <ol>
+      <li>
+        <p>Откатите ваш рабочий код до шага 3.</p>
+        <pre>git checkout -f step-3</pre>
+      </li>
+      <li>
+        <p>Перезагрузите страницу или проверьте приложение на 
+           <a href="http://angular.github.com/angular-phonecat/step-3/app">сервере Angular</a>.
+        </p>
+      </li>
+    </ol>
+  </div>
+  
+</div>
+
+
+Теперь приложение имеет окно для поиска (search box). Обратите внимание, что список телефонов на странице меняется 
+в зависимости от того, что пользователь вводит в окно поиска.
+
+Наиболее важные изменения между шагом 2 и текущим шагом (шагом 3) перечислены ниже. Вы можете увидеть полный список 
+изменений перейдя по ссылке {@link https://github.com/angular/angular-phonecat/compare/step-2...step-3 GitHub}:
+
+
+## Контроллер
+
+Нам не потребовалось вносить изменения в контроллер.
+
+
+## Шаблон
+
+__`app/index.html`:__
+<pre>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2">
+        <!--Sidebar content-->
+
+        Search: <input ng-model="query">
+
+      </div>
+      <div class="col-md-10">
+        <!--Body content-->
+
+        <ul class="phones">
+          <li ng-repeat="phone in phones | filter:query">
+            {{phone.name}}
+            <p>{{phone.snippet}}</p>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+</pre>
+
+Мы добавили стандартный HTML тег `<input>` и воспользовались магией Angular-а, а именно функцией 
+{@link api/ng.filter:filter $filter}, которая обрабатывает входные данные для директивы
+{@link api/ng.directive:ngRepeat ngRepeat}.
+
+Это позволяет пользователю вводить критерии поиска и сразу же видеть результат своего поиска по списку
+телефонов. Этот новый код демонстрирует следующее:
+
+* Cвязывание данных: Это одна из основных особенностей в Angular-е. При загрузке страницы, Angular связывает
+  имя поля ввода с переменной, с таким же именем, в модели (data model) и синхронизирует их между собой.
+
+  В этом коде, данные, которые пользователь вводит в поле ввода (с именем __`query`__) сразу же
+  доступны как фильтр входных данных для списка повторителя (repeater) (`phone in phones | filter:`__`query`__).
+  Когда изменяется модель (data model) это вызывает изменение входных данных для повторителя (repeater's input),
+  повторитель обновляет DOM, чтобы отразить текущее состояние модели.
+
+      <img  class="diagram" src="img/tutorial/tutorial_03.png">
+
+* Использование `filter` фильтра: функция {@link api/ng.filter:filter Фильтр(filter) } использует значение
+  переменной `query` для создания нового массива, который содержит только те записи, которые соответствуют `query`.
+
+  `ngRepeat` автоматически обновляет представление (view) в ответ на изменение количества телефонов, которые
+  возвращает фильтр `filter`. Процесс полностью прозрачен для разработчика.
+
+
+## Тестирование
+
+На шаге 2 мы узнали как написать и запустить модульные тесты (unit tests). Модульные тесты идеально подходят 
+для тестирования контроллеров и других компонентов нашего приложения, написанных на JavaScript, но модульными тестами
+не очень-то легко тестировать DOM-манипуляции или связи нашего приложения. Для этих целей системные тесты 
+(end-to-end tests) являются гораздо лучшим выбором.
+
+Функция поиска была полностью реализована через шаблоны (templates) и связывание данных (data-binding), 
+поэтому мы напишем наш первый системный тест, чтобы убедиться, что эта функция работает.
+
+__`test/e2e/scenarios.js`:__
+<pre>
+describe('PhoneCat App', function() {
+
+  describe('Phone list view', function() {
+
+    beforeEach(function() {
+      browser.get('app/index.html');
+    });
+
+
+    it('should filter the phone list as user types into the search box', function() {
+
+      var phoneList = element.all(by.repeater('phone in phones'));
+      var query = element(by.model('query'));
+
+      expect(phoneList.count()).toBe(3);
+
+      query.sendKeys('nexus');
+      expect(phoneList.count()).toBe(1);
+
+      query.clear();
+      query.sendKeys('motorola');
+      expect(phoneList.count()).toBe(2);
+    });
+  });
+});
+</pre>
+
+Этот тест проверяет, что поле поиска и повторитель правильно соединены (wired) друг с другом. Обратите внимание, как
+легко писать системные тесты в Angular-е. Хотя этот пример является простым тестом, он действительно легко 
+переписывается на любой функционал и легко читаем.
+
+# Запуск системных тестов
+
+Хотя синтаксис этого теста очень похож на модульный тест для нашего контроллера, написанный при помощи Jasmine, но
+системные тесты для Angular-проектов используют фреймворк {@link https://github.com/angular/protractor Protracor}.
+
+Для запуска системного теста запустите команду `npm run protractor`. Обратите внимание, что на момент запуска 
+системных тестов ваше приложение должно быть запущено на веб-сервере.
+
+Системные тесты работают медленнее модульных тестов, поэтому Protractor после прогона тестов завершает свое выполнение 
+и автоматически не перезапускает набор тестов после каждого изменения файла. Чтобы снова запустить набор системных 
+тестов, заново выполните команду `npm run protractor`.
+
+
+# Давайте поэкспериментируем
+
+Давайте посмотрим, как мы можем получить текущее значение `query` модели и отобразить ее 
+в заголовке (title) HTML-страницы.
+
+* Добавим код системного теста в блок `describe`, файл `test/e2e/scenarios.js` должен выглядеть так:
+
+  <pre>
+    describe('PhoneCat App', function() {
+  
+      describe('Phone list view', function() {
+  
+        beforeEach(function() {
+          browser.get('app/index.html');
+        });
+  
+        var phoneList = element.all(by.repeater('phone in phones'));
+        var query = element(by.model('query'));
+  
+        it('should filter the phone list as user types into the search box', function() {
+          expect(phoneList.count()).toBe(3);
+  
+          query.sendKeys('nexus');
+          expect(phoneList.count()).toBe(1);
+  
+          query.clear();
+          query.sendKeys('motorola');
+          expect(phoneList.count()).toBe(2);
+        });
+  
+        it('should display the current filter value in the title bar', function() {
+          query.clear();
+          expect(browser.getTitle()).toMatch(/Google Phone Gallery:\s*$/);
+  
+          query.sendKeys('nexus');
+          expect(browser.getTitle()).toMatch(/Google Phone Gallery: nexus$/);
+        });
+      });
+    });
+  </pre>
+  
+  Запустите тесты командой `npm run protractor`, чтобы убедиться, что тесты не прошли.
+  
+  * Вы могли бы подумать, что нужно просто добавить {{query}} в title тег следующим образом:
+
+          <title>Google Phone Gallery: {{query}}</title>
+
+  Однако, когда вы перезагрузите страницу, вы не увидите ожидаемого результата. Это происходит потому, 
+  что `query` модель живет в областе видимости (scope), определенной body-элементом:
+
+          <body ng-controller="PhoneListCtrl">
+
+  Если вы хотите связать `query` модель с `<title>`-элементом, вы должны __переместить__ объявление
+  `ngController` в html элемент, потому что он является общим родителем для body и title элементов:
+
+          <html ng-app="phonecatApp" ng-controller="PhoneListCtrl">
+
+  Обязательно __удалите__ декларацию `ng-controller` из body элемента.
+  
+  * Снова запустите тесты командой `npm run protractor`, чтобы увидеть, что теперь тесты проходят успешно.
+
+  * Использование двойных фигурных скобок хорошо работает в title элементе, но вы могли заметить, что на самом деле,
+  фигурные скобоки на долю секунды отображаются пользователю при загрузке страницы. Лучшим решением было 
+  бы использовать {@link api/ng.directive:ngBind ngBind} или {@link api/ng.directive:ngBindTemplate
+ngBindTemplate} директивы, которые невидимы для пользователя при загрузке страницы:
+
+          <title ng-bind-template="Google Phone Gallery: {{query}}">Google Phone Gallery</title>
+
+
+# Идем дальше
+
+Вот мы и добавили полнотекстовый поиск и тест, чтобы убедиться, что поиск работает! Теперь можем идти дальше
+на {@link step_04 Шаг 4}, чтобы узнать как добавить возможность сортировки телефонов в приложение.
+
+
+<ul doc-tutorial-nav="3"></ul>
+
